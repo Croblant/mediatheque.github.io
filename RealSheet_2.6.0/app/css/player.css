@@ -1,0 +1,1532 @@
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../font/roboto-latin.woff2'); 
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../font/roboto-500-latin.woff2'); 
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 400;
+  xxfont-display: swap;
+  src: url('../font/Barlow-Condensed-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Luckiest Guy';
+  font-style: normal;
+  font-weight: 400;
+  src: url(../font/luckiest-guy-400.woff2) format('woff2');
+}
+
+/* noto-music-regular - latin_latin-ext_music */
+@font-face {
+  font-family: 'Noto Music';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../font/noto-music-v19-latin_latin-ext_music-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  /*font-display: swap;*/
+}
+
+/*noto-sans-symbols-v40-latin_latin-ext_symbols-700.woff2*/
+
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 100 900;
+  /*font-display: swap;*/
+  src: url(../font/roboto-slab-latin.woff2) format('woff2');
+  /* latin 
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  */
+  /* latin-ext 
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  */
+}
+
+
+
+/* top separator line */
+body::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 0; 
+  top: env(safe-area-inset-top, 0);
+  border-bottom: 1px solid gray; 
+  z-index: 9999;
+  pointer-events: none;
+}
+
+
+/* bottom separator line */
+body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 0; 
+  bottom: env(safe-area-inset-bottom, 0);
+  border-top: 1px solid gray; 
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/*hide lines on iOS*/
+@supports (-webkit-touch-callout: none) {
+  /*body::before,
+  body::after {
+    content: "";
+    display: none;
+  }*/
+
+  body::after {
+    content: "";
+    display: none;
+  }
+}
+
+
+html, body {
+  touch-action: pan-x pan-y; /*no pinch zoom*/
+  margin: 0 !important;
+  padding: 0 !important;  
+  color: #000000 !important;
+  background-color: white;
+  overflow: hidden; 
+}
+
+
+html {
+  overscroll-behavior: none; /*disable pull-to-refresh*/
+  /*overscroll-behavior-x: none; */ /* prevents browsing back / forward by sliding from outside the screen */
+  overflow: auto;
+  /*
+  overflow: hidden;
+  overflow-x: hidden; 
+  scroll-behavior: smooth;
+  height: 90vh;
+  */
+  filter: none !important;
+  background-image: none !important;
+  background-color: #ffffff !important; 
+}
+
+body {
+  width: 100%;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 18px;
+  line-height:21px;
+  font-family: 'Roboto','Segoe UI',Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';
+  font-family: Roboto, sans-serif;
+  color: currentColor;
+  /*text is unselectable*/
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  shape-rendering: geometricPrecision;
+  overflow: hidden; /* Prevent scrolling */
+  background-color: #ffffff !important; 
+}
+
+
+#behindMenu {
+  display: block;
+  top: 0;
+  width: 100%;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 10px;
+  line-height:10px;
+  font-family: Roboto, sans-serif;
+  color: red;
+  /*transition: height 0.2s ease-in-out, top 0.2s ease-in-out;*/
+  background: #fafafa; 
+}
+
+a {
+  /*prevent context menu on links*/
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Chrome/Firefox (old) */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+  user-select: none;
+}
+
+header {
+  margin-bottom: 0px;
+}
+
+div {
+  page-break-inside: avoid;
+  page-break-before: always;
+}
+
+.link {
+   color: black;
+   -webkit-appearance: none;
+   appearance: none;
+}
+
+.container {
+  max-width: 700px;
+}
+
+#menu {
+  /* hor Menu bar */
+  display: none;
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  z-index: 50;
+  max-width: 100%;
+  background: #aacccc; 
+  padding-left: 1em;
+  padding-right:0em;
+  padding-top: 0.5em;
+  padding-bottom:0.5em;
+  border: 0px;
+  transition: height 0.2s ease-in-out, top 0.2s ease-in-out;
+}
+
+.menu.slide-up {
+  top: -100px; /* Slide the menu bar up to be hidden (adjust as needed) */
+}
+
+
+#audio {
+  display: none;
+  padding: 1em 0em;
+}
+
+.settings-layer {
+  position: fixed;
+  z-index: 100;
+  list-style-type: none;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  height:100%;
+  padding: 1em 1em;
+  padding-bottom: 0px;
+  background-color: hsl(180, 25%, 85%);
+  display: none;
+  line-height: 1.2em;
+  font-size: 1em;
+  overflow-y: auto;
+}
+
+
+#info{
+  background-color: #aacccc;
+}
+
+#introNoTunes{
+  position: absolute;
+  z-index: 200;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height:100%;
+  background: #aacccc; /*#bbbbbb*/
+
+}
+
+#showSysInfo { /*Button*/
+  color:#aacccc;
+}
+
+.infotext {
+  /*#infocolumn{*/
+  line-height: 120%;
+  padding: 0,0,0,0;
+  font-size: 1em;
+  width: 100%;
+  word-wrap: break-word;
+  color:#508282;
+}
+
+.icon{
+  display: inline;
+  vertical-align:middle;
+  width: 1.5em;
+  height:auto;
+  padding:0;
+  margin:0;
+  margin-right:-0.3em;
+  border: 0px solid black;
+}
+
+.icon-sm{
+  display: inline;
+  vertical-align:middle;
+  width: 1em;
+  height:auto;
+  padding:0;
+  margin:0;
+  margin-right:10px;
+}
+
+.iconInstall {
+  display: inline;
+  vertical-align:top;
+  width: 22px;
+  height:auto;
+  padding:0;
+  margin:0;
+  margin-right:-0.3em;
+  border: 0px solid black;
+}
+
+.tuneLinkImg {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  align-items: center;
+  margin-right: 10px;
+}
+
+#image-container {
+  display: none; /* Hide images */
+  visibility: hidden;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+
+.dropdown-content {
+  float:none;
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  top: 40px;
+  right: 0px;
+  box-shadow: 0px 8px 12px 0px rgba(0,0,0,0.3);
+  z-index: 200;
+  border:1px solid #ddd;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a, 
+.dropdown-content p,
+.dropdown-content span {
+  color: black;
+  padding: 0.7em 1em;
+  text-decoration: none;
+  display: block;
+  float: none;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #ccc;
+}
+
+.dropdown-content a:last-child,
+.dropdown-content p:last-child,
+.dropdown-content span:last-child {
+  border-bottom: none;
+}
+
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #ddd;}
+
+/* Show the dropdown menu (use JS to add this class to the .dropdown-content container) */
+.show {display:block;}
+
+.abcjs-title{ 
+  /* Song title */
+  font-family: 'Roboto Slab','Noto Music','Helvetica','Times','serif';
+  font-size: 1.7em;
+  font-weight: 400;
+  /*transform: translateY(.3em);*/  /*move down towards the staves*/ 
+} 
+
+.abcjs-chord{ 
+  /* Chord Symbols */
+  font-family: 'Roboto','Noto Music','Helvetica','sans-serif';
+  font-size: 1.3em;
+  line-height: 0.5em;
+  font-weight: 500; 
+  transform: translateY(.5em); /*move down towards the staves*/
+} 
+
+.abcjs-annotation{ 
+  /* Other "^text" above and below staves  */
+  font-family: 'Roboto','Noto Music','Helvetica','sans-serif';
+  font-size: 1em;
+  font-weight: 400; 
+  transform: translateY(.5em); /*move down towards the staves*/
+} 
+
+.abcjs-symbol{ 
+  /*  Symbols */
+  font-family: 'Roboto','Noto Music','Helvetica','Times','serif';
+  font-size:.2em;   
+  line-height:3em;
+  font-weight: 400; 
+  padding:-10px;
+  margin-top: -10px;
+  outline-color: #000;
+  transform: translateY(.7em); /*move down towards the staves*/
+} 
+
+.abcjs-subtitle {
+  transform: translateY(-.2em); /*move up*/
+}
+
+.abcjs-lyric {
+  /*Lyrics below the staves*/
+  font-family: 'Barlow Condensed', "Arial Narrow", "Helvetica Condensed", sans-serif;
+  font-size: 0.9;
+  font-weight: 400; 
+  transform: translateY(-.2em); /*move up towards the staves*/
+  /*
+  word-spacing: 10px;
+  margin-right:20px;
+  letter-spacing: -.05em;
+  */  
+}
+
+.abcjs-tempo {
+  /*text-anchor="start"*/
+  transform: translatex(-2.5em);
+}
+
+.abcjs-part {
+  font-family: "Roboto Condensed", "Arial Narrow", "Helvetica Condensed", sans-serif;
+  transform: translate(-1.5em, 0.5em);
+  /*
+  border-top: 130px;
+  line-height: 0px;
+  padding:0;
+  Margin:0;
+  */
+}
+
+/* Repositionnement ciblé des textes de répétition uniquement (D.S., D.C., Coda, Fine). */
+.abcjs-repeat {
+  transform: translateY(-.6em);
+}
+
+.abcjs-defined-text {
+  /*font-family: 'Roboto','Noto Music','Helvetica','Times','serif';*/
+  font-size: 1em;
+  font-family: 'Noto Music','Roboto Slab','Helvetica','sans-serif';
+  font-weight: 400;
+}
+
+[data-name="unalignedWords"] tspan {    
+    font-family: 'Roboto','Noto Music','Helvetica','sans-serif';
+    font-size: 0.8em;        
+    font-weight: 400;    
+}
+
+.abcjs-bar path{
+  /*vertical bar lines*/
+  stroke-width: 0.9px; 
+  stroke: currentColor; /* Adds a stroke if not already present */
+}
+
+/*
+.abcjs-note{
+  border:1px solid red;
+  padding: 20px;
+}
+*/
+
+.abcjs-highlight {
+  fill: #1976d2 !important;
+  stroke: #1976d2 !important;
+}
+
+a, 
+a:visited {
+  text-decoration: none;
+  color:black;
+}
+
+ul{
+  list-style-type: none;
+}
+
+li {
+white-space: nowrap;
+/*display: inline;
+padding-right:15px;
+line-height:2.5em;
+*/
+}
+
+main {
+  padding: 0;
+}
+
+fieldset {
+  margin: 0px 0;
+}
+
+fieldset p {
+  padding: 0;
+  margin: 0;
+  color: #6d6d6d;
+  font-style: italic;
+}
+
+textarea {
+  width: 100%;
+  border: 0px solid currentColor;
+  height: 50%;
+  padding: 2%;
+}
+
+#warnings {
+  color: #000; 
+  padding: 15px 20px;
+}
+.statuscontainer {
+  display:block;
+  padding: 0;
+  float:right;
+}
+
+.statusmsg {
+  color: #688181; /*#688181;*/
+  border:1px;
+  padding: 0;
+  padding-right:4px;
+  padding-top:2px;
+  /*background-color: #1fce45;
+  display:inline;
+  float:right;
+  */
+  font-size: 0.5em;
+  line-height: 1em;
+}
+
+#warnings:empty,
+.statusmsg:empty {
+  display: none;
+}
+
+
+.audio-error {
+  color: red;
+  border: 2px solid red;
+  padding: 10px;
+}
+
+span{
+  padding: 0px;
+  margin: 0px;
+}
+
+.span-nowrap{
+  white-space: nowrap;
+}
+
+pre, span.code {
+  font-size: 14px;
+  padding: 5px;
+  font-family: Monaco, monospace;
+  border: 1px solid #ffffff;
+}
+
+ax {
+  color: currentColor;
+  text-decoration: none;
+  margin:0;
+  padding:0;
+}
+
+a:visited {
+  color: currentColor;
+}
+
+h1 {
+  margin: 0px 0;
+}
+
+h2 {
+  font-family: 'Roboto','Noto Music','Helvetica','sans-serif';
+  font-size: 1.5em;
+  font-weight: 400;
+  margin-bottom: 0px;
+  line-height: 1.4em;
+}
+
+h3 {
+  font-size: 1.2em;
+  font-weight: 400;
+  margin-bottom: 10px;
+  line-height: 1.3em;
+}
+
+p {
+  text-align: start;
+  overflow-wrap: break-word; 
+  white-space: wrap;
+  padding: 0 0;
+  margin: 0 0;
+  display: table;
+}
+
+hr{
+  display:block;
+  border: none;
+  background-color: #444444;
+  height:1px;
+  margin-bottom: 1.5em;
+}
+
+.menudivider{
+  border: none;
+  background-color:rgb(200, 200, 200);
+  height:3px;
+  margin-bottom: 0em;
+}
+
+input[type="search"], input[type="text"] {
+  width: 16em;
+  font-size: 1em;
+  margin: 0 3px 0.7em 0; 
+  padding: 4px 4px 4px 4px; 
+  height: 2em;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  outline: none;
+  color: black;
+  appearance: searchfield; 
+  -webkit-appearance: searchfield; 
+}
+
+/* pseudo-Clear-Button */
+#tuneSearch:not(:placeholder-shown) {
+  background-image: url('data:image/svg+xml;utf8,<svg fill="gray" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18" stroke="gray" stroke-width="2"/><line x1="6" y1="18" x2="18" y2="6" stroke="gray" stroke-width="2"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+  background-size: 16px 16px;
+}
+
+#fileInputLabel{
+  vertical-align: middle;
+  position: relative;
+  margin-right: 10px;
+  display:inline-block;
+}
+
+input[type="checkbox"] {
+  vertical-align: middle;
+  position: relative;
+  bottom: 1px;
+  margin-right: 10px;
+
+  /*display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.1em;*/
+}
+
+.checkbox-label{
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  margin-right: 15px;
+  line-height:1.5em;
+}
+
+.radio-group{
+  border: 0px solid #bbb;
+  margin-left: 0;
+  margin-bottom: 12px;
+  margin-top: 20px;
+  margin-right: 0px;
+}
+
+.radio-label{
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  margin-right: 15px;
+}
+
+input[type="radio"] {
+  vertical-align: middle;
+  position: relative;
+  bottom: 1px;
+  margin-right: 5px;
+  border: 0px;
+  width: 1.5em;
+  height: 1.5em;
+
+  /*display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.1em;*/
+}
+  
+input[type="file"] {
+  display: none;
+}
+
+
+/* Style the label as the custom button */
+.bluebutton {
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  /*padding: 10px 15px;
+  border-radius: 5px;*/
+}
+
+.startbutton {
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  border: 0px solid #000000;
+  border-radius: 7px;
+  font-family:'Roboto', sans-serif;
+  font-size: 1.5em;
+  font-weight: 400;
+  padding: 0 1.5em 0.2em 1.5em;
+  line-height: 1em; /* Adjust the height to match the button's height */
+  height: 2.5em;
+}
+
+/* Style the file input button using the pseudo-element */
+#filelabel::file-selector-button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button, .button {
+  display: inline;
+  vertical-align:center;
+  padding: 5px 10px;
+  margin-left: 0;
+  margin-right: 0px;
+  margin-top: 7px;
+  font-size: 1em;
+  background: inherit;
+  color: #222222;
+  border: 1px solid #000000;
+  border-radius: 5px;
+}
+
+/* remove active / focus highlight */
+button:focus, button:active,
+.button:focus, .button:active {
+  outline: none;
+  box-shadow: none;
+  background-color: #444444;
+  color: white;
+  border-color: #444444;
+}
+
+
+
+/* Basic styling for the <select> element */
+select {
+  /*color-scheme: light dark;*/
+  color-scheme: light;
+  color:black !important ;
+  -webkit-text-fill-color: #000 !important;
+  background-color: #aacccc !important; /* bg in closed state*/
+  /*
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  */
+  outline: none;
+  text-decoration: none;
+  border: 1px solid #666666;
+  padding: 5px;
+  font-size: 1em;
+  border-radius: 5px;
+  font-family: 'Roboto','Noto Music','Helvetica','sans-serif';
+  line-height: 0.7em;
+}
+
+select option {
+  color: #000 !important;
+  background-color: #fff !important;
+  border: 1px solid #5c5c5c;
+  padding: 5px;
+  line-height: 20;
+}
+
+select option:hover {
+  background-color: #ddd;
+}
+
+select option:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+select option:disabled {
+  color: #5b7373;
+  font-style: italic; 
+  background-color: #666; 
+}
+
+
+.visible-background svg {
+  background: #f5f5f5;
+}
+
+table {
+  border-spacing: 0;
+}
+
+th {
+  text-align: start;
+}
+
+th, td {
+  border: 1px solid #dfe2e5;
+  padding: 16px 20px;
+}
+
+tr:nth-child(even) {
+  background-color: #F6F8FA;
+}
+
+.table-header td {
+  background: #adf3f3;
+  font-size: 22px;
+}
+
+@media only screen and (min-width:700px) {
+
+  header {
+    max-width: 1000px;
+    margin: 0 auto 0px auto;
+    padding: 0 30px;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  table {
+    margin: 0 auto;
+  }
+}
+
+.hamburger {
+  font-family: Roboto;
+  font-size: 2em;
+  padding: 0 10px 0 0;
+}
+
+.menuItems {
+  /*vert menu*/
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menuItems li {
+  padding: 12px 20px;
+  border-bottom: 1px solid #aacccc;
+  color:white;
+  font-weight: 500;
+}
+
+/*
+.menuItems li:last-child {
+  border-bottom: none;
+}
+*/
+
+.icon-and-logo{
+  display: flex;
+  align-items: center;
+  gap: 12px;  /* Space between logo and text */
+}
+
+#navMainHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;  /* Space between logo and text */
+  padding:20px;
+}
+
+#navMain{
+  background-color: #5c8787; /*#008080*/;
+  height: 100%;
+  color:white;
+  animation: slideInFromLeft 0.2s ease-out;
+  overflow: visible; 
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+#mainMenuInfo {
+  padding:20px;
+}
+
+.sidenav {
+  height: 100%; 
+  width: 600px; 
+  position: fixed; 
+  z-index: 940; 
+  top: 0;
+  left: -800px;
+  background-color: #aacccc; /*#aaddbb;*/
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 0px; 
+  padding:0;
+  transition: 0.3s linear; /* 0.5s ease-in-out;  0.5 second transition effect to slide in the sidenav */
+  box-shadow: 3px 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.sidenav .nav-page{
+  background-color: #aacccc; 
+  padding-top: 0px;
+  padding-left: 15px;
+  padding-left:0;
+  padding-right: 0px;
+  font-size: 0.9 em;
+  line-height: 1.5em;
+}
+
+
+/* Navigation menu links */
+.sidenav a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  font-size: 1em;
+  line-height: 2.2em;  
+  color: #000000;
+  background-color: #eee;
+  display: flex;
+  padding-left: 20px;
+  border-bottom: 1px solid #ccc;
+  align-items: center;
+}
+
+
+.sidenav a:hover {
+  color: #000000;
+  background-color: #eee;
+}
+
+.sidenav a:active {
+  color: #000000;
+  background-color: rgb(80, 221, 252);
+}
+
+.sidenav .closeIcon{
+  position: absolute;
+  width: 1.5em;
+  height:auto;
+  top: 15px;
+  right: 10px;
+  margin-left: 0px;
+  margin-top: 0px;
+}
+
+.sidenav .rightbutton{
+  position: absolute;
+  height:auto;
+  top: 15px;
+  right: 10px;
+  margin-left: 0px;
+  margin-top: 0px;
+  font-size: 0.9em;
+}
+
+#navTunesHead, #navManageTunesHead {
+  display: block;
+  position: sticky;
+  top: 0px;
+  width: 660px;
+  z-index: 50;
+  max-width: 100%;
+  font-size: 1 em;
+  padding: 20px 0px 1px 20px;
+  background: #aacccc;
+  align-items: center;
+}
+
+#sideNavFilter {
+    padding: 20px 0px;
+    padding: 1em 0;
+    border: 0px solid red;
+}
+
+.sidenav .tuneBookList {
+  list-style: none; /* Remove default bullet points */
+  padding: 00px;
+  margin: 0;
+}
+
+.sidenav .tuneBookList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  padding: 8px 20px; 
+  border-bottom: 1px solid #aaa; 
+  background: #eeeeee;
+}
+.sidenav .tuneBookList li:nth-child(even) {
+  background-color: #ffffff; /* Light gray for even items */
+}
+.sidenav .tuneBookListText {
+  flex: 1; /*  expand + fill remaining space */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidenav .tuneBookListButton1,
+.sidenav .tuneBookListButton2 {
+  width: 1.2em;
+  height:auto;
+  margin-left: 15px;
+}
+
+.sidenav .tuneBookListButton2 {
+  margin-left: 25px;
+  margin-right: 10px;
+}
+
+.sidenav .tuneBookListIcon {
+  width: 2.5em;
+  height:2.7em;
+  margin-right: 15px;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  margin-left: 0px;
+}
+
+#tuneList {
+  padding: 0px 0px 0px 0px;
+  position: relative;
+}
+
+.sidenav #noTunesInfo,
+.sidenav #noTuneListInfo {
+  position: relative;
+  padding-left: 20px;
+  padding-right: 10px;
+  /*padding-top: 187px;*/
+}
+
+.sidenav #tunebookInfo {
+  position: relative;
+  padding-left: 0px;
+  padding-right: 20px;
+  padding-bottom: 15px;
+  /*padding-top: 187px;*/
+}
+
+.navPageContent {
+  padding: 20px 20px;
+}
+
+.navPageContent a, 
+.navPageContent a:hover {
+  font: inherit;
+  padding: 0;
+  background: none;
+  height: none;
+  display: inline;
+  border-bottom: 0px solid #ccc;
+  text-overflow: unset;
+
+}
+
+
+.settings-layer .closebtn {
+  position: absolute;
+  top: 0.8em;
+  right: 0.5em ;
+  font-size: 36px;
+  margin-left: 0px;
+  margin-top: 0px;
+}
+
+.unselectable {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.manageTunesSection{
+  display: block;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.bookCover {
+  display: inline;
+  float:left;
+  margin-top:0px;
+  margin-right: 20px;
+  margin-bottom: 0px;
+  width: 50px;
+  height: auto;
+}
+
+.closeLayer{ /*Area at Bottom of settings layer*/
+  padding: 0;
+  padding-top: 10px;
+  padding-bottom:30px;
+}
+
+.spacer {
+  display: inline-block;
+  border:1px black;
+  background-color: red;
+  width:2%;
+  min-width: 1px;
+}
+
+.navHeadline {
+  font-family: inherit;
+  font-size: 1.3em;
+  display: inline;
+  margin-top: 0px;
+  margin-bottom:20px;
+}
+
+.logo {
+  display: inline-block;
+  width: 64px;
+  border-radius: 14px;
+  border: 1px solid #7f9d9d;
+  box-shadow: 0px 8px 12px 0px #1f2525;
+  /*margin-left: auto;
+  margin-right: auto;
+  width: 40%;*/
+}
+
+.logoText {
+  font-family:'Luckiest Guy', sans-serif;
+  font-size: 2.7em;
+  line-height: 1;
+  font-weight:400;
+  color:white;
+  padding-top: 0.1em;
+  letter-spacing: 0.03em;
+  justify-content: center; 
+  align-content: center;   /* Center content vertically  */
+}
+
+
+.logoTextBlack {
+  color:black;
+}
+
+.logoLink {
+  text-decoration: none;
+}
+
+.logolarge {
+  font-size: 1.15em;
+}
+
+
+.cover {
+  position: fixed;
+  z-index: 900;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background: black;
+  opacity: 0;
+  display: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.add-padding {
+  padding: 10px 20px;
+}
+
+/* off-screen container used to measure the real sheet size before printing */
+#measureWrap {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 690px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#paperframe{
+  display:block;
+  width: 100%;
+  margin: 0 auto; 
+  padding: 15px 12px 15px 15px;
+  padding-bottom: 0;
+  padding-top: 0;
+  border: 0px solid blue;
+  overflow: hidden;  
+  background-color: white;
+  /*max-width: 100vw; */ /* Ensures it doesn’t exceed the viewport width */
+  /*max-height: 100vh;*/ /* Ensures it doesn’t exceed the viewport height */
+}
+
+/* Les accords de la 2e ligne (et suivantes) etaient tronques en haut : avec oneSvgPerLine, abcjs
+   rogne chaque ligne (svg + div englobant en overflow:hidden) alors que les accords, agrandis
+   (1.3em) et decales par translateY, depassent du cadre calcule. On laisse donc deborder. */
+#paper svg,
+#paper .abcjs-inner > div {
+  overflow: visible !important;
+}
+
+.paper {
+  position: relative; 
+  margin: 0;
+  padding: 0em;
+  background-color: white;
+  border: 0px solid red;
+}
+
+#notes {
+    border: 1px solid white;
+    padding: 5px;
+    color: red;
+    font-size: 0.9em;
+    display: none;
+    background: transparent; 
+    transition: background-color 0.2s linear;
+}
+
+#notes.flash { 
+  background-color: rgba(255,0,0,1);
+  color:white;
+}
+
+.slide-left, .slide-right {
+  transition: transform 0.2s;
+}
+
+.slide-left.revealed {
+  transition: transform 0s ;
+  transform: translateX(-120%);
+}
+
+.slide-right.revealed {
+  transition: transform 0s ;
+  transform: translateX(120%);
+}
+
+#ABCCode{
+  font-family: monospace;
+  font-size: 0.7em;
+  line-height: 1.2em;
+}
+
+#slidingShadow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left:-50px;
+  height: 100%;
+  width: 30px;
+  background-color: white;
+}
+
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+  z-index: 9999; /* Ensure it appears on top of other elements */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner-container {
+  text-align: center;
+}
+
+.spinner-container img {
+  width: 50px; /* Adjust the size of the spinner image as needed */
+  height: 50px;
+  animation: spin 1s linear infinite; /* Apply rotation animation */
+  filter: invert(1); /* Invert all colors */
+}
+
+#spinnerText {
+  color: white;
+  padding-bottom: 0.5em;
+  font-size:1em;
+  line-height: 2em;
+  width: 50%;
+}
+
+#spaceBelowSheet{
+  color: #000000;
+  /*background-color: white;*/
+}
+
+#menuHideOnNoTitle {
+  visibility: hidden;
+  display: none;
+}
+
+#shortSysInfo, #sysInfoWrapper{
+  display: none;
+  color: #111111;
+}
+
+.installText{
+  font-family: 'Roboto','sans-serif';
+  font-size: 1em;
+  font-weight: 400;
+  margin-bottom: 0px;
+  line-height: 1.4em;
+}
+
+.greylink,
+.greylink a {
+  color: #cccccc;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Additional styles to hide the spinner when not needed */
+.div-hidden {
+  display: none;
+}
+
+#installScreen{
+  display: none;
+}
+
+.rotate-90 {
+  transform: rotate(90deg); /* Rotates the element by 90 degrees clockwise */
+  display: inline-block;
+}
+
+.installHelp {
+  /*visibility: hidden;*/
+  display: none;
+}
+
+
+/*on small screens*/
+@media only screen and (max-width: 700px) {
+
+  body {
+    font-size: 16px;
+    line-height:19px;
+  }
+
+  #backbutton{
+    transform: translateX(-.4em); /*move arrow icon left*/
+    margin:0;
+    margin-right:-0.5em;
+  }
+  .spacer {
+    width:5px;
+  }
+
+  .icon{
+    width: 1.4em;
+    height:auto;
+  }
+
+  select {
+    padding: 4px 4px;
+    font-size: 1em;
+  }
+  
+  input[type="radio"] {
+    margin-right: 3px;
+    width: 1.2em;
+    height: 1.2em;
+  }
+
+  .radio-label{
+    margin-left: 0px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    margin-right: 8px;
+  }
+
+  .sidenav {
+  width: 94%; 
+  left: -800px;
+  }
+  
+  #sideNavHead {
+    width: 94%;
+  }
+
+  .sidenav .tuneBookListButton2 {
+    margin-left: 15px;
+  }
+
+}
+
+
+/*on VERY small screens*/
+@media only screen and (max-width: 450px) {
+  .hideOnSmallScreens {
+    visibility: hidden;
+    display: none;
+  }
+
+  .spacer {
+    width:4px;
+  }
+
+  body {
+    font-size: 14px;
+    line-height:16px;
+  }
+  input[type="radio"] {
+    margin-right: 2px;
+    width: 1.1em;
+    height: 1.1em;
+  }
+  select {
+    padding: 4px;
+    font-size: 1em;
+    border-radius: 5px;
+  }
+
+}
+
+/*on VERY VERY  small screens*/
+@media only screen and (max-width: 370px) {
+  body {
+    font-size: 12px;
+    line-height:15px;
+  }
+
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+@media print {
+  #measureWrap{
+    display: none !important;
+  }
+  #menu{
+    display: none;
+    visibility: hidden;
+  }
+  body {
+    margin: 0; 
+    margin-top: 0cm;
+    margin-left: 0cm;
+    margin-right: 0cm;
+    padding:0;
+    /*transform: scale(0.95); */
+  }
+  div {
+    page-break-inside: avoid;
+    page-break-before: avoid;
+    page-break-after: avoid; /*always*/
+    /*
+    */
+  }
+  
+  @page {
+    /* no fixed size: the user's paper (A4, Letter, ...) is used, see #paperframe below */
+    /*
+    margin-top: 1cm;
+    margin-left: 1cm;
+    margin-right: 1cm;
+    margin-bottom: 0cm;
+    margin: 0; 
+    */
+  }
+
+  /* Fit the tune on ONE page, whatever the paper size.
+     vh is unreliable in print (Android/iOS use the screen or a default paper), so the page
+     height is taken from the layout itself: html/body = 100% of the page area, and body is a
+     size container, so cqw/cqh below are the real printable width/height.
+     --sheet-hw (height/width of the sheet) and --notes-h are set by redrawNow(). */
+  html, body {
+    height: 100%;
+    overflow: hidden;      /* never create a second page */
+  }
+  body {
+    container-type: size;
+  }
+  #paperframe {
+    --frame-pad-x: 27px;   /* = left + right padding of #paperframe */
+    width: 100%;           /* fallback for browsers without container units */
+  }
+  @supports (width: 1cqh) {
+    #paperframe {
+      /* widest frame that is not taller than the page (3% spare), never wider than the page */
+      width: min(100cqw, calc((97cqh - var(--notes-h, 0px)) / var(--sheet-hw, 1.5) + var(--frame-pad-x)));
+    }
+  }
+
+  body::before,
+  body::after {
+    /* remove separator lines from print layout */
+    display: none !important; 
+  }
+
+}
+
+#rsPlaybackControls button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+#rsPlaybackStatus {
+  white-space: nowrap;
+  font-size: 11px !important;
+}

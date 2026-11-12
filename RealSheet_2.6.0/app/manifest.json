@@ -1,0 +1,29 @@
+{
+  "name": "RealSheet",
+  "short_name": "RealSheet",
+  "start_url": "./realsheet.html",
+  "scope": "./",
+  "description": "Your easy-to-use lead sheets.",
+  "display": "standalone",
+  "background_color": "#aacccc",
+  "theme_color": "#000000",
+  "launch_handler": {
+    "client_mode": [
+      "focus-existing",
+      "navigate-new"
+    ]
+  },
+  "icons": [
+    {
+      "src": "img/ic_launcher-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "img/ic_launcher-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

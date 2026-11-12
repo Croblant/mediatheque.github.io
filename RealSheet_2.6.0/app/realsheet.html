@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html translate="no">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><!-- XXX viewport-fit=cover XXX-->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="google" content="notranslate" />
+  <meta name="theme-color" content="#000000"><!--Status bar -->
+  <meta name="color-scheme" content="light dark"><!-- "light"-->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black"> <!-- default -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="RealSheet">
+  <link rel="apple-touch-icon" href="img/r-logo-180.png">
+  <link rel="apple-touch-startup-image" href="img/ic_launcher-512.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/ic_launcher-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="img/ic_launcher-512.png">
+  <link rel="stylesheet" type="text/css" href="css/player.css?v=999" id="styles">
+  <link rel="manifest" href="manifest.json"/>
+  <script src="filemode.js"></script><!--mode file:// (double-clic), inactif en http(s)-->
+  <script src="lib/abc.js?v=1000-grace" type="text/javascript"></script>
+  <script src="lib/jszip.min.js" type="text/javascript"></script>
+  <script src="lib/dom-to-image.min.js"></script><!--PDF/PNG export-->
+  <script src="lib/jspdf.umd.min.js"></script><!--PDF export-->
+  <script src="lib/pako.min.js"></script><!--needed for upng-->
+  <script src="lib/UPNG.js"></script><!--PNG export-->
+  <script src="lib/ua-parser.min.js"></script><!--browser/system detection-->
+  <script src="realsheet.js?v=1000-grace" type="text/javascript"></script>
+  <script src="installmenu.js?v=2"></script><!--onglet Install (web, Android/iOS)-->
+  <script src="playback.js"></script>
+  <script>window.tricktrack = window.tricktrack || function () {};</script>
+  <title>RealSheet</title>
+</head>
+<body onload="load()"  translate="no">
+  <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" style="position: absolute; width: 1px; height: 1px; opacity: 0;">
+  <div id="menu" class="menu" aria-hidden="true">
+    <span id="showTitlesMenu"><img id="backbutton" class="icon" src="img/back.png"> <span class="hideOnSmallScreens">Tunes</span></span>
+    <!--<a id="showTitlesMenu" href="#">&lt;</a>-->
+    <span id="menuHideOnNoTitle">
+      <div class="spacer"></div>
+      <span class="span-nowrap">
+        <span class="hideOnSmallScreens" ID="key2"></span><!--<span ID="key"></span>-->
+        <select class="transpose-half-steps" name="steps" id="steps" >
+          <option value="12">+12 </option>
+          <option value="11">+11 </option>
+          <option value="10">+10 </option>
+          <option value="9">+9 </option>
+          <option value="8">+8 </option>
+          <option value="7">+7 5th</option>
+          <option value="6">+6 </option>
+          <option value="5">+5 4th</option>
+          <option value="4">+4 </option>
+          <option value="3">+3 </option>
+          <option value="2">+2 </option>
+          <option value="1">+1 </option>
+          <option selected="selected" value="0">(Std.)</option>
+          <option value="-1">-1 </option>
+          <option value="-2">-2 </option>
+          <option value="-3">-3 </option>
+          <option value="-4">-4 </option>
+          <option value="-5">-5 4th</option>
+          <option value="-6">-6 </option>
+          <option value="-7">-7 5th</option>
+          <option value="-8">-8 </option>
+          <option value="-9">-9 </option>
+          <option value="-10">-10 </option>
+          <option value="-11">-11 </option>
+          <option value="-12">-12 </option>
+        </select>
+
+        <select class="transpose-instrument" name="steps2" id="steps2" >
+          <option selected="selected" value="0">C-Instrument</option>
+          <option value="2">B♭ instrument</option>
+          <option value="9">E♭ instrument</option>
+          <option value="-3">E♭ instr. -1</option>
+          <option value="7">F instrument</option>
+          <option value="-5">F instr. -1</option>
+          <option value="5">G instrument</option>
+          <option value="-12">C Bass -1 </option>
+          <option value="-10">B♭ Bass -1</option>
+          <option value="-24">C Bass -2 </option>
+          <option value="-22">B♭ Bass -2</option>
+        </select>
+      </span>
+      <div class="spacer"></div>
+
+      <span class="span-nowrap">
+        <!--<a href="#"><img id="displaysettingsbutton" class="icon" src="img/adjust.png"></a>
+        <div class="spacer"></div> -->
+
+        <div class="dropdown">
+          <a href="#"><img id="displaybutton" class="icon" src="img/fit-vertical.png"></a>
+          <div class="dropdown-content" id="display-dropdown">
+            <span>Staff Size</span>
+            <a id="displayStandardButton" href="#"><img class="icon-sm"  src="img/size-3-lines.png">Standard</a>
+            <a id="displaySmallerButton" href="#" ><img class="icon-sm"  src="img/size-4-lines.png">Smaller</a>
+            <a id="displaySmallestButton" href="#" ><img class="icon-sm"  src="img/size-5-lines.png">Smallest</a>
+            <hr class="menudivider">
+            <a id="displayHideLyrics" href="#" ><img class="icon-sm"  src="img/hide-lyrics.png">Hide lyrics</a>
+            <a id="displayLargeChords" href="#" ><img class="icon-sm"  src="img/large-chords.png">Large chords</a>
+           </div>
+        </div>
+        
+        <div class="spacer"></div>
+        <a href="#"><img id="favbutton" class="icon" src="img/heartxl.png" ></a>
+        <div class="spacer"></div>
+        <div class="dropdown">
+          <a href="#"><img id="morebutton" class="icon" src="img/more.png"></a>
+          <!--<button id="morebutton">More</button>-->
+          <div class="dropdown-content" id="more-dropdown">
+            <a id="notesButton" href="#"><img class="icon-sm"  src="img/comment-100.png">Add a note</a>
+            <a id="printButton" href="#"><img class="icon-sm"  src="img/print.png">Print/PDF</a>
+            <a id="exportPdfButton" href="#"><img class="icon-sm"  src="img/png-100.png">Export as PDF</a>
+            <a id="exportPngButton" href="#"><img class="icon-sm"  src="img/png-100.png">Export as PNG</a>
+            <a id="reportErrorButton" href="#"><img class="icon-sm"  src="img/error-100.png">Report an error in this tune</a>
+          </div>
+        </div>
+      </span>
+      <div class="statuscontainer">
+        <div class="statusmsg" id="status">!</div>
+        <div class="statusmsg" id="statusStaff"></div>
+      </div>
+
+    </span> 
+  </div>
+
+
+  <!-- Nav - Manage Tunes -------------------------------------------------------------->
+
+  <div id="sideNav" class="sidenav" aria-hidden="true">
+    <!--<a href="#" class="closebtn" id="hideTitlesMenu">&times;</a>--><!-- &#215; -->
+
+    <div id="navManageTunes" class="nav-page">
+
+      <div ID="navManageTunesHead">
+          <span id="hamburger2" class="hamburger">☰</span>
+          <span class="navHeadline">Edit Tunebooks </span>
+          <button id="toTuneList" class="rightbutton"><img class="icon" src="img/back.png" >&nbsp;&nbsp;Back to tunes &nbsp; </button>
+        <!--<img id="hideManageTunes" class="closeIcon" src="img/close.png">-->
+        <!--<div class="spacer"></div>-->
+        <br><br>
+        <div id="tunebookInfo">Tunes are organized in tunebooks. Here you can add, reload or remove your tunebooks.</div>
+      </div>
+      <div class="manageTunesSection">
+        <div id="noTuneListInfo"></div>
+        <!--<h3>Tunebooks</h3>--->
+        <ul class = "tuneBookList">
+          <!-- List structure
+          <li>
+            <img src="img/r-book.png" class="bookCover">
+            <span class="tuneBookListText">
+              Text
+            </span>
+            <img class="tuneBookListButton1" src="img/refresh256.png">
+            <img class="tuneBookListButton2" src="img/trash100.png">
+          </li>
+          -->
+        </ul>
+        
+      </div>
+      <div class="manageTunesSection add-padding">
+        <span id="addTunebook">
+          <button id="plus2" class="bluebutton">&nbsp; + &nbsp; Add tunebook &nbsp; </button>
+        &nbsp;&nbsp;</span>
+        <!--<button id="toTuneList" class="button"> &nbsp; Show tune list  &nbsp; </button>-->
+        <br><br><br>
+        <div id="toggleAdvanced">Advanced options &nbsp; <span id="advanced-arrow" class="advanced-arrow rotate-90">&#10095;</span></div> 
+        <br>
+        <div id="manageAdvanced" class="manageTunesSection div-hidden">
+            Download a tunebook from external source<br>
+            <input type="text" placeholder="Tunebook URL" id="downloadURL">
+            <!--<div id="suggestionList">test</div>-->
+            <button id="importListWeb">Download</button>
+            <br><br>
+            Load from local device or cloud <br>
+            <label for="fileInput" class="button" id="fileInputLabel">Select Tunebook File</label>
+            <input type="file" id="fileInput" accept=".abc,.tunebook,.abct">
+        </div>
+    </div>
+      <br><br><br><br>
+    
+    </div>
+
+    <!-- Nav - Tunes -------------------------------------------------------------->
+
+    <div id="navTunes" class="nav-page">
+
+      <div id="navTunesHead">
+        <!--<img id="hideTunesMenu" class="closeIcon" src="img/close.png">-->
+       <span class="hamburger">☰</span>
+        <span class="navHeadline">Tunes &nbsp;</span>
+          <div class="spacer"></div>
+          <button id="plusbutton" class="rightbutton"><img class="icon" src="img/edit.png" >&nbsp;&nbsp;Edit</button>
+    
+          <div id="sideNavFilter">
+            <input type="search" id="tuneSearch" placeholder="Title or composer" spellcheck="false" maxlength="40"></input><br>
+            in <select id="tbFilter">                  
+                <option value="all">All tunes</option>
+                <option value="fav">Favorites</option>
+                <option value="last">Last viewed</option>
+                <option disabled><i>— Tunebooks ———</i></option><!-- ── -->
+                <!--<optgroup label="Tunebooks"></optgroup>-->
+            </select>
+              <span id="nrOfTunes"></span>              
+          </div>
+      </div>
+
+      <div id="noTunesInfo"></div>
+      <div id="tuneList"></div>
+
+    </div>
+
+    <!-- Backup -------------------------------------------------------------->
+
+    <div id="navBackup" class="nav-page">
+
+      <div class="navPageContent">
+        <!--<img id="hideTunesMenu" class="closeIcon" src="img/close.png">-->
+        <span id="hamburger1" class="hamburger">☰</span>
+        <span class="navHeadline">Backup &nbsp;</span>
+
+        <br><br>
+        Save and restore a backup of your user preferences, such as favorites or selected keys. 
+        Note that the backup does not include the tunes themselves. <br><br>
+
+        <button id="saveBackup">Save backup</button><br>
+        <br>
+
+        <button id="restoreBackup">Restore backup</button><br>
+        <br>
+      
+      </div>
+
+    </div>
+
+
+    <!-- About Menu -------------------------------------------------------------->
+
+     <div id="navAbout" class="nav-page">
+
+      <div class="navPageContent">
+        <!--<img id="hideTunesMenu" class="closeIcon" src="img/close.png">-->
+        <span id="hamburger1" class="hamburger">☰</span>
+        <span class="navHeadline">About RealSheet &nbsp;</span>
+
+        <br><br>
+        <div class="icon-and-logo">
+          <img class="logo" src="img/r-logo-500.png"> &nbsp;
+          <span class = "logoText logoTextBlack notranslate" translate="no">
+              <span class="logolarge">R</span>eaL<span class="logolarge">S</span>hEET  
+            </a>
+          </span>
+        </div>
+        <br>
+        <h2>Jazz tunes at your fingertips: the intuitive lead sheet app</h2>    
+        <br>
+        Get instant access to hundreds of jazz tunes. Explore easy-to-read lead sheets of jazz standards, with melodies, chords, and lyrics. Transpose the tunes up or down to any key.
+        <br><br>
+            
+        Further information: 
+        <a href="https://realsheet.net" target="_blank" rel="noreferrer" class="externalLink"><u>realsheet.net</u></a>
+        <br><br>      
+        <a href="mailto:mail@realsheet.net"><u>Contact us</u> with questions and suggestions.</a>
+        <br><br>      
+        <a href="#" id="createTitleList"><u>List of titles</u></a> 
+        <br><br>   
+        <a href="#" id="systemUpdateButton"><u>Update the app to the latest version</u></a> 
+        <br><br>      
+        <a href="#" id="resetButton"><u>Reset the app</u></a> 
+        <br><br>      
+
+        
+
+        <a href="#" id="showSysInfo">++++++++++++++++++++++<br>">++++++++++++++++++++++</a><br>
+        <div id="sysInfoWrapper">
+          <div class="infotext" id="sysInfo">
+            Sysinfo here...
+          </div>
+          <div>
+            <br><br>
+            <a href="#" id="resetErrorMsg"><u>Reset error msg</u></a><br><br>
+            <a href="#" id="sendSysInfo"><u>Send via email</u></a><br>
+            <br><br>
+          </div> 
+        </div> 
+      
+      </div>
+
+    </div>
+
+    <!-- Main Menu -------------------------------------------------------------->
+  
+      <div id="navMain" class="nav-page">
+  
+        <div id="navMainHead">
+          <img class="logo" src="img/r-logo-500.png"> &nbsp;
+          <span class = "logoText notranslate" translate="no">
+              <span class="logolarge">R</span>eaL<span class="logolarge">S</span>hEET  
+          </span>         
+        </div>
+        <br>
+
+        <div id="mainMenuItems">
+          <ul class="menuItems">
+            <li id="menuTunes">Tunes </li>
+            <li id="menuManageTunebooks">Edit tunebooks </li>
+            <li id="menuUpdateTunebooks">Update all tunebooks</li>
+            <li id="menuBackup">Backup</li>
+            <li id="menuAbout">About RealSheet</li>
+            <li id="menuInstall" style="display:none" data-i18n="0601">Install RealSheet</li>
+          </ul>
+        </div>
+        <div id="mainMenuInfo">
+          <br>
+          <span id="realsheetVersion">RealSheet v 142.261028</span><br>
+          &copy; 2024-2026 RealSheet<br>
+        </div>
+
+      </div>
+  
+    </div>
+  </div>
+
+  <!-- info page ------------------------------------------->
+  <div class="settings-layer" id="info" aria-hidden="true">
+    <span><a href="#" class="closebtn" id="hideSettingsLayer">&times;</a></span>
+    
+    <br><br><br>
+  </div>
+
+  <div class="settings-layer" id="abc" aria-hidden="true">
+    <span><a href="#" class="closebtn" id="hideSettingsLayer">&times;</a></span><!-- &#215; -->
+    <h2 id="ABCCodeHead">ABC</h2>
+    <hr><br>
+    <div id="ABCCode"></div>  
+    <div class = "closeLayer" id="closeLayer">
+      <button id="close">Close</button>
+    </div>      <br><br></p>
+  </div>
+
+  <div class="settings-layer" id="editor" aria-hidden="true"> 
+    <textarea id="abctext" spellcheck="false">
+    </textarea>
+  </div>
+
+  <div class="settings-layer" id="audio" aria-hidden="true">
+  </div>
+
+  
+  <!----------------------------------->
+  
+  <div id="paperframe"><div id="notes"></div><div id="paper" class="paper"></div></div>
+  <div id="warnings"></div>
+  <div id="spaceBelowSheet"></div>
+  <div id="cover" class="cover"></div>
+
+  <div class="settings-layer" id="installScreen" aria-hidden="true">
+
+    <img src="img/r-logo-180.png" class="logo" id="installScreenLogo">
+    <br><br>
+
+    <div class="installHelp" id="installPlaceholder">
+      <br>
+      <h2> </h2><br>
+      <br><br>
+      <div class="installText">
+        <br><br>
+        <br>
+      </div>
+    </div>
+
+
+    <div class="installHelp" id="installWait" aria-hidden="true">
+      <br>
+      <h2 data-i18n="0201">Install RealSheet on your device</h2><br>
+      <br><br>
+      <div class="installText" data-i18n="0212">
+         Please wait...
+        <br><br>
+        <br>
+      </div>
+    </div>
+    
+    <div class="installHelp" id="installStart" aria-hidden="true">
+      <br>
+      <h2 data-i18n="0101">Install RealSheet on your device</h2><br>
+   
+      <button id="installButton" class="startbutton" data-i18n="0102"><u><b>↓</b></u> &nbsp; Install the App</button>
+      <br><br><br>
+      <div class="installText" id="platforminfo">
+        
+        <br><br>
+        <br>
+      </div>
+      <br>
+    </div>
+
+    <div class="installHelp" id="installSuccess" aria-hidden="true">
+      <br>
+      <h2 data-i18n="0271">Installing RealSheet...</h2><br>
+      <br><br>
+      <div class="installText" data-i18n="0202">
+         You can now close this browser tab and launch the app from the icon.
+        <br><br>
+        <br>
+      </div>
+    </div>
+      
+    <div class="installHelp" id="installAndroid" aria-hidden="true">
+      <br>
+      <h2 data-i18n="0602">Install RealSheet on your Android device</h2><br>
+      <div class="installText" data-i18n="0603">
+        <b>1. Open the browser menu </b><br>(<strong> &nbsp;⋮&nbsp; </strong> or <strong> &nbsp;&equiv;&nbsp; </strong> icon) 
+        <br><br>
+        <b>2. Then, select  "Add page to home screen..." </b><br> The wording may vary depending on the browser. 
+        <br><br>
+        After installation, close this browser tab and open the app using the icon. <br> 
+      </div>
+      <br><br><br>
+      <div class="installText" data-i18n="0604">
+        Please note:<br>
+        The installation feature has been extensively tested on Chrome. 
+        The installation may not be available or may not work properly on other browsers. 
+        Please use Chrome if possible. 
+      </div>
+      <br><br>
+    </div>
+      
+    
+    <div class="installHelp" id="installIos" aria-hidden="true">
+      <h2 data-i18n="0401">Install RealSheet on your iPad/iPhone</h2><br>
+      
+      <div class="installText" data-i18n="0403">
+        <b>1. Open the share menu of your browser</b><br>
+        ( the <img src="img/share90.png" class="iconInstall">&nbsp; icon ) <br><br>
+        
+        <b>2. Then, select "Add to homescreen" </b><br>
+        ( the <img src="img/plus90.png" class="iconInstall">&nbsp; icon ) <br><br>
+        
+        <br>
+        After installation, close this browser tab and open the app using the icon. 
+      </div>
+      <br><br><br>
+      <div class="installText" data-i18n="0402">
+        Please note:<br>
+        The installation feature has been extensively tested on Safari. 
+        On other browsers the installation may not be available or may not work properly. 
+        Please use Safari if possible. 
+      </div>
+      <br><br>
+    </div>
+
+    <div class="installHelp" id="installIosWait" aria-hidden="true">
+      <h2 data-i18n="0404">After you've installed RealSheet...</h2><br>
+      
+      <div class="installText" data-i18n="0405">
+        After installation, close this browser tab and open the app using the icon. 
+      </div>
+      <br><br><br>
+    </div>
+
+    <br>
+    <div class="installText" aria-hidden="true"><br><a href="https://realsheet.net" id="installCloseLink">❮ 
+        <u><span data-i18n="0501">Close the app installation</u><span>
+      </a><br><br></div>
+    <span class="greylink">
+      <a href="https://realsheet.net/web/check.html"><code>i</code></a><br> 
+      <!--<a href="#" id="showShortSysInfo">+</a><br>-->
+    </span>
+
+    <br><br>
+    <div id="iosDebug"></div>
+
+    
+    <div id="shortSysInfo"></div> 
+    <br><br><br>
+  </div>
+  <div id="image-container"></div>
+
+  <div id="spinnerOverlay" class="spinner-overlay div-hidden" aria-hidden="true">
+    <div class="spinner-container">
+      <span id="spinnerText">XXXX</span><br><br>
+      <img src="img/refresh256.png" alt="X">
+    </div>
+  </div>
+
+
+</body>
+</html>
