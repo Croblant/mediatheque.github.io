@@ -1345,6 +1345,19 @@ tr:nth-child(even) {
 #installScreen{
   display: none;
   color: #000000;
+  /* Sans top/left, un element fixed garde sa position statique, c.-a-d.
+     sous le contenu precedent : l'ecran apparaissait en bandeau en bas. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  z-index: 1000;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #installScreen h2, #installScreen .installText, #installScreen a {
