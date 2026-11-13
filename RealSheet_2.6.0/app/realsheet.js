@@ -2797,21 +2797,6 @@ function load() {
         try {
             const rsPaper = document.getElementById("paperframe");
             if (rsPaper && m && m[0] && ABCJS.synth && ABCJS.synth.CreateSynth) {
-                // Garder un AudioContext unique pendant la session : certains navigateurs
-                // suspendent le contexte audio lors d'un défilement ou d'un changement
-                // temporaire d'état de la page.
-                if (!window.__rsPlaybackScrollResumeBound) {
-                    window.addEventListener("scroll", function () {
-                        const ac = window.__rsPlaybackAudioContext;
-                        if (ac && ac.state === "suspended" &&
-                            document.getElementById("rsPlaybackPlay")?.dataset.playing === "true") {
-                            ac.resume().catch(function (err) {
-                                console.warn("RealSheet: reprise audio après défilement impossible", err);
-                            });
-                        }
-                    }, { passive: true });
-                    window.__rsPlaybackScrollResumeBound = true;
-                }
                 let rsControls = document.getElementById("rsPlaybackControls");
                 if (!rsControls) {
                     rsControls = document.createElement("div");
@@ -2880,18 +2865,11 @@ function load() {
                             if (window.__rsPlaybackSynth) {
                                 try { window.__rsPlaybackSynth.stop(); } catch (e) {}
                             }
-                            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                            if (!AudioContextClass) throw new Error("AudioContext indisponible");
-                            const audioContext = window.__rsPlaybackAudioContext ||
-                                (window.__rsPlaybackAudioContext = new AudioContextClass());
-                            if (audioContext.state === "suspended") await audioContext.resume();
-
+                            // Laisser ABCJS créer et gérer son contexte audio.
+                            // Le partage manuel d'un AudioContext peut désynchroniser le
+                            // moteur audio et TimingCallbacks sur Chrome Android.
                             const synth = new ABCJS.synth.CreateSynth();
-                            await synth.init({
-                                visualObj: window.__rsCurrentVisual,
-                                audioContext: audioContext,
-                                millisecondsPerMeasure: window.__rsCurrentVisual.millisecondsPerMeasure()
-                            });
+                            await synth.init({ visualObj: window.__rsCurrentVisual });
                             await synth.prime();
                             window.__rsPlaybackSynth = synth;
                             // Le callback de fin de TimingCallbacks remet toujours le bouton sur Lecture.
@@ -2929,7 +2907,9 @@ function load() {
                                     rsStatus.textContent = "";
                                 }
                             });
-                            synth.start();
+                            // Attendre le démarrage réel du synthé avant de lancer
+                            // l'horloge visuelle : évite une fin prématurée sur mobile.
+                            await synth.start();
                             window.__rsPlaybackTiming.start();
                             rsSetPlaying();
                             rsStatus.textContent = "Lecture";
