@@ -1,3 +1,84 @@
+// RealSheet fix : abcjs ne gère pas les nuplets imbriqués (ex. "(17:8:35 ... (3EFG ...").
+// Une note sans durée (NaN) fait échouer tout le playback. On aplatit chaque nuplet
+// imbriqué en tronçons successifs de facteur q/p combiné, ce qui donne la même durée.
+window.rsFlattenNestedTuplets = function (text) {
+    if (typeof text !== "string" || !/\(\d+:\d*:?\d*/.test(text)) return text;
+    var defQ = {2: 3, 3: 2, 4: 3, 5: 2, 6: 2, 7: 2, 8: 3, 9: 2};
+    var out = [], cur = null, pending = null, nested = false;
+    var i = 0, n = text.length;
+    function consumeNote() {
+        if (!cur) return;
+        cur.remaining--; cur.count++;
+        if (cur.remaining <= 0) {
+            var res = cur.resume;
+            cur = null;
+            if (res) pending = res();
+        }
+    }
+    function flushPending() {
+        if (pending) { out.push(pending); pending = null; }
+    }
+    while (i < n) {
+        var ch = text[i];
+        // lignes d'en-tête / commentaires / directives : copiées telles quelles
+        if ((i === 0 || text[i - 1] === "\n") && /^(?:[A-Za-z]:|%)/.test(text.substr(i, 2))) {
+            var e = text.indexOf("\n", i); if (e < 0) e = n;
+            out.push(text.slice(i, e)); i = e; continue;
+        }
+        if (ch === '"') { var e1 = text.indexOf('"', i + 1); e1 = e1 < 0 ? n : e1 + 1; flushPending(); out.push(text.slice(i, e1)); i = e1; continue; }
+        if (ch === "!") { var e2 = text.indexOf("!", i + 1); e2 = e2 < 0 ? n : e2 + 1; flushPending(); out.push(text.slice(i, e2)); i = e2; continue; }
+        if (ch === "{") { var e3 = text.indexOf("}", i + 1); e3 = e3 < 0 ? n : e3 + 1; flushPending(); out.push(text.slice(i, e3)); i = e3; continue; }
+        if (ch === "[") {
+            var e4 = text.indexOf("]", i + 1); e4 = e4 < 0 ? n : e4 + 1;
+            var isField = /[A-Za-z]/.test(text[i + 1] || "") && text[i + 2] === ":";
+            if (!isField) { flushPending(); consumeNote(); }
+            out.push(text.slice(i, e4)); i = e4; continue;
+        }
+        if (ch === "(") {
+            var m = /^\((\d+)(?::(\d*))?(?::(\d*))?/.exec(text.slice(i, i + 20));
+            if (m) {
+                flushPending();
+                var p = +m[1], q = m[2] ? +m[2] : (defQ[p] || 2), r = m[3] ? +m[3] : p;
+                if (cur && cur.remaining > 0) {
+                    nested = true;
+                    var outer = cur, remOuter = outer.remaining;
+                    outer.opener.r = outer.count;               // tronçon avant le nuplet interne
+                    var o2 = {p: outer.p * p, q: outer.q * q, r: r, mod: true};
+                    out.push(o2);
+                    var after = remOuter - r;
+                    cur = {p: o2.p, q: o2.q, remaining: r, count: 0, opener: o2,
+                        resume: function () {
+                            if (after <= 0) return null;
+                            var o3 = {p: outer.p, q: outer.q, r: after, mod: true};
+                            cur = {p: o3.p, q: o3.q, remaining: after, count: 0, opener: o3};
+                            return o3;
+                        }};
+                } else {
+                    var o = {p: p, q: q, r: r, mod: false, raw: m[0]};
+                    out.push(o);
+                    cur = {p: p, q: q, remaining: r, count: 0, opener: o};
+                }
+                i += m[0].length; continue;
+            }
+            out.push(ch); i++; continue;
+        }
+        if (/[A-Ga-gzxZ]/.test(ch)) {
+            flushPending();
+            out.push(ch); i++;
+            consumeNote();
+            continue;
+        }
+        if (/[\^_=]/.test(ch) && /[A-Ga-g]/.test(text[i + 1] || "")) { flushPending(); }
+        out.push(ch); i++;
+    }
+    if (!nested) return text;
+    return out.map(function (t) {
+        if (typeof t === "string") return t;
+        if (t.r <= 0) return "";
+        return "(" + t.p + ":" + t.q + ":" + t.r;
+    }).join("");
+};
+
 function _0x30a7($, W) {
     $ -= 117;
     let x = _0x3e41()
@@ -2723,6 +2804,7 @@ function load() {
         l = W[c(1263, "tI#]")](l, 12)) : W[c(2154, "Lcks")](l, 12) && (f = W[c(2101, "d*bF")](f, 1),
         l = W[c(2906, "Lcks")](l, 12)),
         r = (r = (r = W.gBkMz($K, r, f, b))[c(1294, "46vM")](/"Cb/g, '"B'))[c(2236, "EeTo")](/"Fb/g, '"E');
+        r = window.rsFlattenNestedTuplets ? window.rsFlattenNestedTuplets(r) : r;
         let S = W[c(1990, "zl#a")](xe, r);
         var C = ABCJS[c(2653, "aTa9")]("*", S)
           , s = ABCJS[c(996, "$uvt") + "se"](S, C, l);
