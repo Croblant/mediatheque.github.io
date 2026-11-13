@@ -99,25 +99,52 @@
     }
   }
 
-  function openInstallScreen() {
-    var scr = document.getElementById('installScreen');
-    if (!scr) return;
-    var plat = mobilePlatform();
-    if (plat === 'ios') {
-      showHelp('installIos');
-    } else if (deferredPrompt) {
-      showHelp('installStart');
-    } else {
-      showHelp('installAndroid');
-    }
-    scr.style.display = 'block';
-    scr.setAttribute('aria-hidden', 'false');
-
-    // Refermer le volet latéral sideNav
+  function closeSideNav() {
     var sn = document.getElementById('sideNav');
     if (sn) {
       sn.style.left = '-800px';
       sn.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function showScreen(helpId) {
+    var scr = document.getElementById('installScreen');
+    if (!scr) return;
+    showHelp(helpId);
+    scr.style.display = 'block';
+    scr.setAttribute('aria-hidden', 'false');
+  }
+
+  // Lance directement l'installation native de Chrome (equivalent du menu
+  // Chrome "Installer l'application"), dans le geste de l'utilisateur.
+  function launchNativeInstall() {
+    var dp = deferredPrompt;
+    deferredPrompt = null;   // un prompt ne peut etre utilise qu'une fois
+    try {
+      dp.prompt();
+      dp.userChoice.then(function (choice) {
+        if (choice && choice.outcome === 'accepted') {
+          showScreen('installSuccess');
+        } else {
+          showScreen('installAndroid');   // annule : instructions manuelles
+        }
+      }).catch(function () { showScreen('installAndroid'); });
+    } catch (e) {
+      showScreen('installAndroid');
+    }
+  }
+
+  // Clic sur l'onglet "Install" : sur Android/Chrome, on declenche tout de
+  // suite l'installation (sans ecran intermediaire). Sinon : instructions.
+  function openInstallScreen() {
+    var plat = mobilePlatform();
+    closeSideNav();
+    if (plat === 'ios') {
+      showScreen('installIos');
+    } else if (deferredPrompt) {
+      launchNativeInstall();
+    } else {
+      showScreen('installAndroid');
     }
   }
 
@@ -130,21 +157,8 @@
 
   function installButtonClicked() {
     if (deferredPrompt) {
-      showHelp('installWait');
-      var dp = deferredPrompt;
-      deferredPrompt = null;   // un prompt ne peut etre utilise qu'une fois
-      try {
-        dp.prompt();
-        dp.userChoice.then(function (choice) {
-          // Si l'utilisateur annule, on revient aux instructions manuelles
-          // (si l'installation reussit, 'appinstalled' affiche le succes).
-          if (!choice || choice.outcome !== 'accepted') showHelp('installAndroid');
-        }).catch(function () { showHelp('installAndroid'); });
-      } catch (e) {
-        showHelp('installAndroid');
-      }
+      launchNativeInstall();
     } else {
-      // Pas de prompt natif disponible : montrer les instructions.
       showHelp(mobilePlatform() === 'ios' ? 'installIos' : 'installAndroid');
     }
   }

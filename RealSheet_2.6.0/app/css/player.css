@@ -1344,6 +1344,11 @@ tr:nth-child(even) {
 
 #installScreen{
   display: none;
+  color: #000000;
+}
+
+#installScreen h2, #installScreen .installText, #installScreen a {
+  color: #000000;
 }
 
 .rotate-90 {
