@@ -51,6 +51,23 @@
     return isWebLaunch() && !!mobilePlatform() && !isStandalone();
   }
 
+  // --- Service worker ----------------------------------------------------------
+  // Chrome n'emet 'beforeinstallprompt' (bouton d'installation natif) que si la
+  // page est controlee par un service worker. On l'enregistre ici (http/https
+  // uniquement), avec une portée relative au dossier app/.
+  function registerServiceWorker() {
+    if (!isWebLaunch() || !('serviceWorker' in navigator)) return;
+    var go = function () {
+      try {
+        navigator.serviceWorker.register('service-worker.js', { scope: './' })
+          .catch(function (err) { console.warn('SW registration failed:', err); });
+      } catch (e) { /* ignore */ }
+    };
+    if (document.readyState === 'complete') go();
+    else window.addEventListener('load', go);
+  }
+  registerServiceWorker();
+
   // --- Ecran d'installation ----------------------------------------------------
 
   var deferredPrompt = null;
@@ -114,9 +131,18 @@
   function installButtonClicked() {
     if (deferredPrompt) {
       showHelp('installWait');
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(function () { deferredPrompt = null; })
-        .catch(function () { deferredPrompt = null; });
+      var dp = deferredPrompt;
+      deferredPrompt = null;   // un prompt ne peut etre utilise qu'une fois
+      try {
+        dp.prompt();
+        dp.userChoice.then(function (choice) {
+          // Si l'utilisateur annule, on revient aux instructions manuelles
+          // (si l'installation reussit, 'appinstalled' affiche le succes).
+          if (!choice || choice.outcome !== 'accepted') showHelp('installAndroid');
+        }).catch(function () { showHelp('installAndroid'); });
+      } catch (e) {
+        showHelp('installAndroid');
+      }
     } else {
       // Pas de prompt natif disponible : montrer les instructions.
       showHelp(mobilePlatform() === 'ios' ? 'installIos' : 'installAndroid');
