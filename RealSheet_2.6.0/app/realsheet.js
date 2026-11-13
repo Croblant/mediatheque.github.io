@@ -2797,6 +2797,21 @@ function load() {
         try {
             const rsPaper = document.getElementById("paperframe");
             if (rsPaper && m && m[0] && ABCJS.synth && ABCJS.synth.CreateSynth) {
+                // Garder un AudioContext unique pendant la session : certains navigateurs
+                // suspendent le contexte audio lors d'un défilement ou d'un changement
+                // temporaire d'état de la page.
+                if (!window.__rsPlaybackScrollResumeBound) {
+                    window.addEventListener("scroll", function () {
+                        const ac = window.__rsPlaybackAudioContext;
+                        if (ac && ac.state === "suspended" &&
+                            document.getElementById("rsPlaybackPlay")?.dataset.playing === "true") {
+                            ac.resume().catch(function (err) {
+                                console.warn("RealSheet: reprise audio après défilement impossible", err);
+                            });
+                        }
+                    }, { passive: true });
+                    window.__rsPlaybackScrollResumeBound = true;
+                }
                 let rsControls = document.getElementById("rsPlaybackControls");
                 if (!rsControls) {
                     rsControls = document.createElement("div");
@@ -2852,6 +2867,9 @@ function load() {
                                 window.__rsPlaybackSynth = null;
                                 try { stoppedSynth.stop(); } catch (e) {}
                             }
+                            document.querySelectorAll(".abcjs-highlight").forEach(function (el) {
+                                el.classList.remove("abcjs-highlight");
+                            });
                             rsSetStopped();
                             rsStatus.textContent = "";
                             return;
@@ -2862,8 +2880,18 @@ function load() {
                             if (window.__rsPlaybackSynth) {
                                 try { window.__rsPlaybackSynth.stop(); } catch (e) {}
                             }
+                            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                            if (!AudioContextClass) throw new Error("AudioContext indisponible");
+                            const audioContext = window.__rsPlaybackAudioContext ||
+                                (window.__rsPlaybackAudioContext = new AudioContextClass());
+                            if (audioContext.state === "suspended") await audioContext.resume();
+
                             const synth = new ABCJS.synth.CreateSynth();
-                            await synth.init({ visualObj: window.__rsCurrentVisual });
+                            await synth.init({
+                                visualObj: window.__rsCurrentVisual,
+                                audioContext: audioContext,
+                                millisecondsPerMeasure: window.__rsCurrentVisual.millisecondsPerMeasure()
+                            });
                             await synth.prime();
                             window.__rsPlaybackSynth = synth;
                             // Le callback de fin de TimingCallbacks remet toujours le bouton sur Lecture.
@@ -2872,6 +2900,17 @@ function load() {
                             }
                             window.__rsPlaybackTiming = new ABCJS.TimingCallbacks(window.__rsCurrentVisual, {
                                 eventCallback: function (ev) {
+                                    // Synchroniser le suivi visuel avec les événements de notes ABCJS.
+                                    document.querySelectorAll(".abcjs-highlight").forEach(function (el) {
+                                        el.classList.remove("abcjs-highlight");
+                                    });
+                                    if (ev && ev.elements) {
+                                        ev.elements.forEach(function (group) {
+                                            group.forEach(function (el) {
+                                                if (el && el.classList) el.classList.add("abcjs-highlight");
+                                            });
+                                        });
+                                    }
                                     if (ev !== null || window.__rsPlaybackSynth !== synth) return;
                                     window.__rsPlaybackSynth = null;
                                     if (window.__rsPlaybackTiming) {
@@ -2883,6 +2922,9 @@ function load() {
                                         clearTimeout(window.__rsPlaybackEndTimer);
                                         window.__rsPlaybackEndTimer = null;
                                     }
+                                    document.querySelectorAll(".abcjs-highlight").forEach(function (el) {
+                                        el.classList.remove("abcjs-highlight");
+                                    });
                                     rsSetStopped();
                                     rsStatus.textContent = "";
                                 }
