@@ -2930,6 +2930,51 @@ function load() {
                     };
                     rsSetStopped();
 
+                    // Suivi automatique de la partition pendant la lecture.
+                    // - Défile quand la ligne jouée entre dans les 25 % du bas (une seule fois par ligne).
+                    // - Défile aussi quand la lecture revient en arrière (reprise / retour en avant) vers une ligne plus haute.
+                    // - Si l'utilisateur défile lui-même, on n'intervient plus tant que la lecture reste sur la même ligne.
+                    window.__rsAuto = { line: null, top: 0, handled: false };
+                    const rsUserScrolled = function () {
+                        if (window.__rsAuto) window.__rsAuto.handled = true;
+                    };
+                    ["wheel", "touchmove", "mousedown"].forEach(function (evt) {
+                        window.addEventListener(evt, rsUserScrolled, { passive: true });
+                    });
+                    window.addEventListener("keydown", function (e) {
+                        if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].indexOf(e.key) !== -1) rsUserScrolled();
+                    });
+                    window.__rsAutoFollow = function () {
+                        try {
+                            const st = window.__rsAuto;
+                            const note = document.querySelector(".abcjs-highlight");
+                            if (!st || !note) return;
+                            const line = note.closest("svg") || note;
+                            const vh = window.innerHeight || document.documentElement.clientHeight;
+                            const r = line.getBoundingClientRect();
+                            const absTop = r.top + window.scrollY;
+                            if (line !== st.line) {
+                                const wentBack = st.line !== null && absTop < st.top - 1;
+                                st.line = line;
+                                st.top = absTop;
+                                st.handled = false;
+                                const inBottom = r.bottom > vh * 0.75;
+                                const offTop = r.top < 0;
+                                if ((wentBack && (offTop || inBottom)) || (!wentBack && inBottom)) {
+                                    st.handled = true;
+                                    window.scrollTo({ top: absTop - vh * 0.25, behavior: "auto" });
+                                }
+                            } else if (!st.handled) {
+                                // Même ligne : la note peut descendre dans la zone basse en cours de ligne.
+                                const nr = note.getBoundingClientRect();
+                                if (nr.bottom > vh * 0.75) {
+                                    st.handled = true;
+                                    window.scrollTo({ top: absTop - vh * 0.25, behavior: "auto" });
+                                }
+                            }
+                        } catch (e) {}
+                    };
+
                     rsToggle.addEventListener("click", async function () {
                         if (rsToggle.dataset.playing === "true") {
                             if (window.__rsPlaybackEndTimer) {
@@ -2982,6 +3027,7 @@ function load() {
                                             });
                                         });
                                     }
+                                    if (ev && ev.elements && window.__rsAutoFollow) window.__rsAutoFollow();
                                     if (ev !== null || window.__rsPlaybackSynth !== synth) return;
                                     window.__rsPlaybackSynth = null;
                                     if (window.__rsPlaybackTiming) {
@@ -3003,6 +3049,8 @@ function load() {
                             // Attendre le démarrage réel du synthé avant de lancer
                             // l'horloge visuelle : évite une fin prématurée sur mobile.
                             await synth.start();
+                            window.__rsAuto.line = null;
+                            window.__rsAuto.handled = false;
                             window.__rsPlaybackTiming.start();
                             rsSetPlaying();
                             rsStatus.textContent = "Lecture";
