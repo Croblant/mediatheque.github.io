@@ -611,7 +611,7 @@ hr{
   margin-bottom: 0em;
 }
 
-input[type="search"], input[type="text"] {
+input[type="search"], input[type="text"], input[type="url"] {
   width: 16em;
   font-size: 1em;
   margin: 0 3px 0.7em 0; 
