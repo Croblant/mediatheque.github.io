@@ -426,7 +426,10 @@ div {
   */
 }
 
-/* Repositionnement ciblé des textes de répétition uniquement (D.S., D.C., Coda, Fine). */
+/* Repositionnement ciblé des textes de répétition uniquement (D.S., D.C., Coda, Fine, Da Capo, Da Segno).
+   abcjs les place contre la portée (et les annotations normales sont en plus descendues de .5em plus haut) :
+   ils sont remontés ici. Valeur négative = plus haut, positive = plus bas ; -.6em reste moins haut que les accords. */
+.abcjs-annotation.abcjs-repeat,
 .abcjs-repeat {
   transform: translateY(-.6em);
 }

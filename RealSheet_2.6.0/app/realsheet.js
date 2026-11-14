@@ -2876,6 +2876,16 @@ function load() {
                 partsbox: !0
             }
         });
+        // patched: textes de reprise (D.C., D.S., Fine, Coda, Da Capo, Da Segno...) : abcjs leur donne la meme
+        // classe que les autres annotations ; on marque ceux-ci pour les decaler (voir .abcjs-repeat dans player.css).
+        try {
+            document.querySelectorAll("#paper .abcjs-annotation").forEach(function (el) {
+                const t = (el.textContent || "").replace(/[\s.]/g, "").toLowerCase();
+                if (/^(dc|ds|fine|dacapo|dasegno|coda|tocoda|(dc|ds|dacapo|dasegno)al(coda|fine))$/.test(t)) {
+                    el.classList.add("abcjs-repeat");
+                }
+            });
+        } catch (rsRepeatError) { /* sans effet sur l'affichage */ }
         // Contrôles de lecture audio de la partition ABC affichée.
         try {
             const rsPaper = document.getElementById("paperframe");
