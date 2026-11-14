@@ -4738,7 +4738,7 @@ function load() {
         {
             const rsBtn = document.getElementById("rsPlaybackPlay");
             const rsPlaying = !!window.__rsPlaybackSynth || !!(rsBtn && rsBtn.dataset.playing === "true");
-            if (rsPlaying && window.__rsLastRenderW === window.innerWidth) return;
+            if (window.__rsLastRenderW === window.innerWidth) return; // patched: toujours ignorer un resize a largeur constante (barre d'adresse mobile), pas seulement en lecture
             // patched: sur Android, le clavier virtuel provoque un resize (hauteur seule) quand on touche un champ
             // texte (recherche, URL...) -> redessin de la partition. On l'ignore tant qu'un champ de saisie a le
             // focus et que la largeur n'a pas change.

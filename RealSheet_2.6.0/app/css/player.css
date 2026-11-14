@@ -110,16 +110,12 @@ html, body {
   padding: 0 !important;  
   color: #000000 !important;
   background-color: white;
-  overflow: hidden;
-  /* Prevent Android Chrome pull-to-refresh without cancelling touch scrolling. */
-  overscroll-behavior-y: none !important;
+  overflow: hidden; 
 }
 
 
 html {
-  /* Root scroll boundary: disable Chrome Android pull-to-refresh. */
-  overscroll-behavior: none !important;
-  overscroll-behavior-y: none !important;
+  overscroll-behavior: none; /*disable pull-to-refresh*/
   /*overscroll-behavior-x: none; */ /* prevents browsing back / forward by sliding from outside the screen */
   overflow: auto;
   /*
