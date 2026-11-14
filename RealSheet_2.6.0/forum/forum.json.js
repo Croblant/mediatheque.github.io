@@ -46,5 +46,14 @@ window.__RS_FILES__["forum.json"]=[
     "contributor": "Croblant",
     "url": "https://raw.githubusercontent.com/Croblant/Mediatheque/main/Philoechos.abct",
     "image": "img/book-globe.png"
+  },
+   {
+    "title": "French Trads",
+    "description": "Compilation de morceaux trads français",
+    "category": "External Tunebooks",
+    "update": "",
+    "contributor": "Croblant",
+    "url": "https://raw.githubusercontent.com/Croblant/Mediatheque/main/French_Trads.abct",
+    "image": "img/book-globe.png"
   }
 ];

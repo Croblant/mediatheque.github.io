@@ -778,7 +778,7 @@ function load() {
         aMpHn: function($, W) {
             return $ == W
         },
-        QvQOv: "img/book-local.png",
+        QvQOv: "img/book-download.png",
         VtIpj: "img/book-g" + $(1234, "nZal"),
         MxLQH: $(2658, "vaC7") + $(2887, "&YWU"),
         AHnup: $(1504, "@^8^") + $(167, "rE2t"),
@@ -3066,35 +3066,98 @@ function load() {
                         }
                     });
                 } else {
-                    // Nouvelle partition affichée : arrêter toute lecture en cours et remettre le bouton sur Lecture.
-                    if (window.__rsPlaybackTiming) {
-                        try { window.__rsPlaybackTiming.stop(); } catch (e) {}
-                        window.__rsPlaybackTiming = null;
-                    }
-                    if (window.__rsPlaybackSynth) {
-                        const rsPrevSynth = window.__rsPlaybackSynth;
-                        window.__rsPlaybackSynth = null;
-                        try { rsPrevSynth.stop(); } catch (e) {}
-                    }
-                    const rsBtnReset = document.getElementById("rsPlaybackPlay");
-                    if (rsBtnReset && rsBtnReset.dataset.playing === "true") {
-                        rsBtnReset.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="display:block;width:1em;height:1em;"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
-                        rsBtnReset.setAttribute("aria-label", "Lire la partition");
-                        rsBtnReset.title = "Lire la partition";
-                        rsBtnReset.dataset.playing = "false";
-                    }
-                    const rsOldStop = document.getElementById("rsPlaybackStop");
-                    if (rsOldStop) rsOldStop.remove();
-                    const rsOldPlay = document.getElementById("rsPlaybackPlay");
-                    if (rsOldPlay && rsOldPlay.tagName === "BUTTON" && rsOldPlay.textContent.includes("Lecture")) {
-                        rsOldPlay.remove();
-                        rsControls.innerHTML = "";
-                        rsControls.id = "rsPlaybackControls";
+                    // Le rendu peut être relancé lors d'une rotation. Si le code ABC est identique,
+                    // on garde le synthé audio et on rattache le suivi visuel au nouveau rendu SVG.
+                    const rsSameTune = window.__rsCurrentAbc === s;
+                    const rsActiveSynth = window.__rsPlaybackSynth;
+                    if (rsSameTune && rsActiveSynth) {
+                        let rsResumeMs = 0;
+                        if (window.__rsPlaybackTiming) {
+                            try { rsResumeMs = window.__rsPlaybackTiming.currentMillisecond() || 0; } catch (e) {}
+                            try { window.__rsPlaybackTiming.stop(); } catch (e) {}
+                        }
+                        window.__rsCurrentVisual = m[0];
+                        // Le suivi précédent ciblait les anciens éléments SVG, désormais remplacés.
+                        if (window.__rsAuto) {
+                            window.__rsAuto.line = null;
+                            window.__rsAuto.top = 0;
+                            window.__rsAuto.handled = false;
+                        }
+                        const rsResumeSynth = rsActiveSynth;
+                        window.__rsPlaybackTiming = new ABCJS.TimingCallbacks(window.__rsCurrentVisual, {
+                            eventCallback: function (ev) {
+                                document.querySelectorAll(".abcjs-highlight").forEach(function (el) {
+                                    el.classList.remove("abcjs-highlight");
+                                });
+                                if (ev && ev.elements) {
+                                    ev.elements.forEach(function (group) {
+                                        group.forEach(function (el) {
+                                            if (el && el.classList) el.classList.add("abcjs-highlight");
+                                        });
+                                    });
+                                }
+                                if (ev && ev.elements && window.__rsAutoFollow) window.__rsAutoFollow();
+                                if (ev !== null || window.__rsPlaybackSynth !== rsResumeSynth) return;
+                                window.__rsPlaybackSynth = null;
+                                if (window.__rsPlaybackTiming) {
+                                    try { window.__rsPlaybackTiming.stop(); } catch (e) {}
+                                    window.__rsPlaybackTiming = null;
+                                }
+                                try { rsResumeSynth.stop(); } catch (e) {}
+                                if (window.__rsPlaybackEndTimer) {
+                                    clearTimeout(window.__rsPlaybackEndTimer);
+                                    window.__rsPlaybackEndTimer = null;
+                                }
+                                document.querySelectorAll(".abcjs-highlight").forEach(function (el) {
+                                    el.classList.remove("abcjs-highlight");
+                                });
+                                const rsPlayButton = document.getElementById("rsPlaybackPlay");
+                                if (rsPlayButton) {
+                                    rsPlayButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
+                                    rsPlayButton.setAttribute("aria-label", "Lire la partition");
+                                    rsPlayButton.title = "Lire la partition";
+                                    rsPlayButton.dataset.playing = "false";
+                                }
+                                const rsPlaybackStatus = document.getElementById("rsPlaybackStatus");
+                                if (rsPlaybackStatus) rsPlaybackStatus.textContent = "";
+                            }
+                        });
+                        if (rsResumeMs > 0) window.__rsPlaybackTiming.start(rsResumeMs / 1000, "seconds");
+                        else window.__rsPlaybackTiming.start();
+                    } else if (!rsSameTune) {
+                        // Une vraie nouvelle partition : arrêter la lecture précédente.
+                        if (window.__rsPlaybackTiming) {
+                            try { window.__rsPlaybackTiming.stop(); } catch (e) {}
+                            window.__rsPlaybackTiming = null;
+                        }
+                        if (window.__rsPlaybackSynth) {
+                            const rsPrevSynth = window.__rsPlaybackSynth;
+                            window.__rsPlaybackSynth = null;
+                            try { rsPrevSynth.stop(); } catch (e) {}
+                        }
+                        const rsBtnReset = document.getElementById("rsPlaybackPlay");
+                        if (rsBtnReset && rsBtnReset.dataset.playing === "true") {
+                            rsBtnReset.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
+                            rsBtnReset.setAttribute("aria-label", "Lire la partition");
+                            rsBtnReset.title = "Lire la partition";
+                            rsBtnReset.dataset.playing = "false";
+                        }
+                        const rsOldStop = document.getElementById("rsPlaybackStop");
+                        if (rsOldStop) rsOldStop.remove();
+                        const rsOldPlay = document.getElementById("rsPlaybackPlay");
+                        if (rsOldPlay && rsOldPlay.tagName === "BUTTON" && rsOldPlay.textContent.includes("Lecture")) {
+                            rsOldPlay.remove();
+                            rsControls.innerHTML = "";
+                            rsControls.id = "rsPlaybackControls";
+                        }
                     }
                 }
                 window.__rsCurrentVisual = m[0];
+                window.__rsCurrentAbc = s;
                 const rsStatus = document.getElementById("rsPlaybackStatus");
-                if (rsStatus) rsStatus.textContent = "Partition prête";
+                const rsPlaybackButton = document.getElementById("rsPlaybackPlay");
+                const rsIsPlaying = !!window.__rsPlaybackSynth && !!(rsPlaybackButton && rsPlaybackButton.dataset.playing === "true");
+                if (rsStatus && !rsIsPlaying) rsStatus.textContent = "Partition prête";
             }
         } catch (rsPlaybackError) {
             console.warn("RealSheet: contrôles audio non initialisés", rsPlaybackError);
