@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><title>Convertir .json en .json.js</title>
+<style>body{font-family:sans-serif;max-width:40em;margin:2em auto;padding:0 1em}</style></head><body>
+<h2>Mode double-clic : convertir un .json</h2>
+<p>Après avoir modifié <code>forum.json</code> (ou un tunebook <code>.json</code>), choisissez-le ici :
+le fichier <code>&lt;nom&gt;.json.js</code> correspondant est téléchargé. Placez-le à côté du .json, en remplaçant l'ancien.</p>
+<input type="file" id="f" accept=".json"><p id="msg"></p>
+<script>
+document.getElementById('f').addEventListener('change', function (e) {
+  var file = e.target.files[0], msg = document.getElementById('msg');
+  if (!file) return;
+  var r = new FileReader();
+  r.onload = function () {
+    try {
+      var data = JSON.parse(r.result);
+      var js = 'window.__RS_FILES__=window.__RS_FILES__||{};\nwindow.__RS_FILES__[' + JSON.stringify(file.name) + ']=' +
+               JSON.stringify(data, null, 2) + ';\n';
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([js], { type: 'text/javascript' }));
+      a.download = file.name + '.js'; a.click();
+      msg.textContent = 'OK : ' + file.name + '.js téléchargé.';
+    } catch (err) { msg.textContent = 'JSON invalide : ' + err.message; }
+  };
+  r.readAsText(file, 'utf-8');
+});
+</script></body></html>

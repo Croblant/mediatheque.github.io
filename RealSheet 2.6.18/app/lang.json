@@ -1,0 +1,67 @@
+{
+ "0101": {
+  "en": "Install RealSheet on your device",
+  "fr": "Installer RealSheet sur votre appareil"
+ },
+ "0102": {
+  "en": "↓ &nbsp; Install the App",
+  "fr": "↓ &nbsp; Installer l'application"
+ },
+ "0201": {
+  "en": "Install RealSheet on your device",
+  "fr": "Installer RealSheet sur votre appareil"
+ },
+ "0202": {
+  "en": "You can now close this browser tab and launch the app from the icon.",
+  "fr": "Vous pouvez fermer cet onglet et lancer l'application depuis son icône."
+ },
+ "0212": {
+  "en": "Please wait...",
+  "fr": "Veuillez patienter..."
+ },
+ "0271": {
+  "en": "Installing RealSheet...",
+  "fr": "Installation de RealSheet..."
+ },
+ "0401": {
+  "en": "Install RealSheet on your iPad/iPhone",
+  "fr": "Installer RealSheet sur iPad/iPhone"
+ },
+ "0402": {
+  "en": "Please note: The installation feature has been extensively tested on Safari.",
+  "fr": "Remarque : la fonction d'installation est testée surtout avec Safari."
+ },
+ "0403": {
+  "en": "Open the share menu of your browser, then select \"Add to home screen\".",
+  "fr": "Ouvrez le menu de partage du navigateur, puis choisissez « Sur l'écran d'accueil »."
+ },
+ "0404": {
+  "en": "After you've installed RealSheet...",
+  "fr": "Après l'installation de RealSheet..."
+ },
+ "0405": {
+  "en": "After installation, close this browser tab and open the app using the icon.",
+  "fr": "Après l'installation, fermez cet onglet et ouvrez l'application avec son icône."
+ },
+ "0501": {
+  "en": "Close the app installation info",
+  "fr": "Fermer l'aide à l'installation"
+ }
+ ,
+ "0601": {
+  "en": "Install RealSheet",
+  "fr": "Installer RealSheet"
+ } ,
+ "0602": {
+  "en": "Install RealSheet on your Android device",
+  "fr": "Installer RealSheet sur votre appareil Android"
+ } ,
+ "0603": {
+  "en": "1. Open the browser menu (the ⋮ or ≡ icon). 2. Then, select \"Add page to home screen...\". The wording may vary depending on the browser. After installation, close this browser tab and open the app using the icon.",
+  "fr": "1. Ouvrez le menu du navigateur (icône ⋮ ou ≡). 2. Puis choisissez « Ajouter à l'écran d'accueil ». Le libellé peut varier selon le navigateur. Après l'installation, fermez cet onglet et ouvrez l'application depuis son icône."
+ } ,
+ "0604": {
+  "en": "Please note: The installation feature has been extensively tested on Chrome. The installation may not be available or may not work properly on other browsers. Please use Chrome if possible.",
+  "fr": "Remarque : l'installation a été surtout testée avec Chrome. Elle peut être indisponible ou ne pas fonctionner correctement avec d'autres navigateurs. Utilisez Chrome si possible."
+ }
+}
