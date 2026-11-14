@@ -2735,6 +2735,7 @@ function load() {
     let $J = Promise[$(3421, "%@lP")]();
     function $w(W) {
         let x = $;
+        window.__rsLastRenderW = window.innerWidth;
         return $J = $J[x(1360, "a6o!")]( () => $E(W)).catch($ => console.error("redraw fai" + x(155, "%@lP"), $))
     }
     async function $E(x) {
@@ -4672,7 +4673,15 @@ function load() {
     }),
     window[$(203, "d*bF") + $(1706, "%@lP")](W[$(3043, "evC!")], function() {
         let x = $;
-        W[x(193, "Rm3U")](W6),
+        W[x(193, "Rm3U")](W6);
+        /* patched: sur mobile, le defilement masque/affiche la barre d'adresse -> evenement resize (hauteur seule)
+           -> redessin complet -> la lecture etait coupee. Pendant la lecture, on ignore un resize qui ne
+           change pas la largeur (rotation / vrai redimensionnement = redessin comme avant). */
+        {
+            const rsBtn = document.getElementById("rsPlaybackPlay");
+            const rsPlaying = !!window.__rsPlaybackSynth || !!(rsBtn && rsBtn.dataset.playing === "true");
+            if (rsPlaying && window.__rsLastRenderW === window.innerWidth) return;
+        }
         W[x(251, "3X$y")]($w)
     }),
     window[$(3303, "Ywe]")] = function($) {}
