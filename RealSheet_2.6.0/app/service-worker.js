@@ -1,5 +1,5 @@
 // Change version to force cache replacement on all clients
-const CACHE_NAME = 'app-cache-v53-repeattext';
+const CACHE_NAME = 'app-cache-v54-repeattext';
 const NETWORK_TIMEOUT_MS = 3000;   // max wait for network on static files
 const OFFLINE_WINDOW_MS = 15000;   // after a failure, serve from cache first for this long
 
@@ -135,12 +135,25 @@ async function handleStatic(event, url) {
   }
 
   try {
-    const res = await fetchWithTimeout(req, NETWORK_TIMEOUT_MS);
-    offlineUntil = 0;
-
-    if (res.status === 200 && res.type === 'basic' && !res.redirected) {
-      event.waitUntil(cache.put(key, res.clone()));
+    // patched: la requete reseau n'est plus annulee au bout de NETWORK_TIMEOUT_MS. Sur un reseau mobile lent
+    // (Android), elle etait abandonnee avant la fin : le cache ne se mettait jamais a jour et l'ancienne
+    // version restait affichee. Maintenant, apres le delai on sert le cache, mais le telechargement continue
+    // en arriere-plan et remplace le cache pour la prochaine ouverture.
+    const netPromise = fetch(req, { cache: 'no-cache' }).then(async (res) => {
+      if (res.status === 200 && res.type === 'basic' && !res.redirected) {
+        try { await cache.put(key, res.clone()); } catch (e) {}
+      }
+      return res;
+    });
+    event.waitUntil(netPromise.catch(() => {}));
+    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), NETWORK_TIMEOUT_MS));
+    let res = await Promise.race([netPromise, timeout]);
+    if (!res) {
+      const stale = await fromCache();
+      if (stale) return stale;
+      res = await netPromise; // rien en cache : on attend le reseau
     }
+    offlineUntil = 0;
     return res;
   } catch (err) {
     // Network failed or timed out
