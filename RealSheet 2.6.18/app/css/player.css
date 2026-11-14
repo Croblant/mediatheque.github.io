@@ -639,7 +639,8 @@ input[type="search"], input[type="text"], input[type="url"] {
   background-size: 16px 16px;
 }
 
-#fileInputLabel{
+#fileInputLabel,
+#setlistFileInputLabel{
   vertical-align: middle;
   position: relative;
   margin-right: 10px;
@@ -1024,7 +1025,8 @@ tr:nth-child(even) {
 }
 
 .sidenav .tuneBookListButton1,
-.sidenav .tuneBookListButton2 {
+.sidenav .tuneBookListButton2,
+.sidenav .tuneBookListShare {
   width: 1.2em;
   height:auto;
   margin-left: 15px;
@@ -1033,6 +1035,10 @@ tr:nth-child(even) {
 .sidenav .tuneBookListButton2 {
   margin-left: 25px;
   margin-right: 10px;
+}
+
+.sidenav .tuneBookListShare {
+  cursor: pointer;
 }
 
 .sidenav .tuneBookListIcon {
@@ -1432,7 +1438,8 @@ tr:nth-child(even) {
     width: 94%;
   }
 
-  .sidenav .tuneBookListButton2 {
+  .sidenav .tuneBookListButton2,
+  .sidenav .tuneBookListShare {
     margin-left: 15px;
   }
 

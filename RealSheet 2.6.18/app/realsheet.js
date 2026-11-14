@@ -4097,7 +4097,7 @@ function load() {
         o.style[x(2817, "XrhR")] = W.wWLLA,
         W[x(130, "Ujmd")]($w)
     }
-    function W_(x) {
+    function W_(x, rsSetlist) {
         let c = $
           , t = {
             DEfbb: function($, W) {
@@ -4169,6 +4169,7 @@ function load() {
                     author: d[$(2743, "e@lT")],
                     lastupdate: d[$(730, "d*bF")],
                     iconcolor: d[$(2114, "a6o!")],
+                    setlist: !0 === rsSetlist,
                     dbk: n
                 }
                   , u = $W[$(462, "gp]&")](W => W[$(2655, "@^8^")] === n);
@@ -4885,6 +4886,13 @@ function load() {
         $B(),
         document[x(458, "%@lP") + x(1151, "a6o!")](W[x(879, "nZal")])[x(909, "FqBi")][0][x(3028, "d*bF")] = !0,
         W[x(3178, "ys&Z")](W5, W.peNSD)
+    }),
+    document.getElementById("setlistFileInput").addEventListener("change", function() {
+        let x = $;
+        W_(this, !0),
+        $B(),
+        document[x(458, "%@lP") + x(1151, "a6o!")](W[x(879, "nZal")])[x(909, "FqBi")][0][x(3028, "d*bF")] = !0,
+        W5(W.peNSD)
     }),
     document.querySelectorAll($(1054, "bmf6") + $(1602, "ys&Z"))[$(950, "bKJJ")](x => {
         let c = $

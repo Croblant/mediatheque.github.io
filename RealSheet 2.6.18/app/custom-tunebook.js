@@ -109,7 +109,6 @@
         ui.newNameInput = document.getElementById("newSetListName");
         ui.newBtn = document.getElementById("newSetListBtn");
         ui.setListSelect = document.getElementById("setListSelect");
-        ui.editBtn = document.getElementById("editSetListBtn");
         ui.deleteBtn = document.getElementById("deleteSetListBtn");
         ui.editor = document.getElementById("setListEditor");
         ui.editNameInput = document.getElementById("editSetListName");
@@ -128,7 +127,6 @@
             ui.newNameInput &&
             ui.newBtn &&
             ui.setListSelect &&
-            ui.editBtn &&
             ui.deleteBtn &&
             ui.editor &&
             ui.editNameInput &&
@@ -157,7 +155,6 @@
             emptyOpt.selected = true;
             emptyOpt.textContent = "(No set lists)";
             ui.setListSelect.appendChild(emptyOpt);
-            ui.editBtn.disabled = true;
             ui.deleteBtn.disabled = true;
             return;
         }
@@ -177,7 +174,6 @@
         if (!matched && ui.setListSelect.options.length > 0) {
             ui.setListSelect.options[0].selected = true;
         }
-        ui.editBtn.disabled = false;
         ui.deleteBtn.disabled = false;
     }
 
@@ -638,8 +634,106 @@
         if (editingDbk) {
             renderSearchResults();
             renderSetListTunes();
+        } else if (ui.setListSelect.value) {
+            openEditorForDbk(ui.setListSelect.value);
         }
         bridge.showNavPage("setlists");
+    }
+
+
+    /* ---- Export .abct d'un tunebook (icône share90.png dans la liste Edit tunebooks) ---- */
+
+    function safeFileName(name) {
+        const cleaned = String(name || "")
+            .replace(/[\\/:*?"<>|\u0000-\u001f]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 80);
+        return cleaned || "tunebook";
+    }
+
+    function xNumber(abc) {
+        const m = /^X:\s*(\d+)/m.exec(abc);
+        return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER;
+    }
+
+    async function buildTunebookAbct(tb) {
+        const bridge = getBridge();
+        const entries = bridge.getIndex().filter(function (t) { return t.tb === tb.dbk; });
+        const tunes = [];
+        for (let i = 0; i < entries.length; i++) {
+            const raw = await bridge.decryptTune(entries[i].id);
+            const abc = String(raw || "")
+                .replace(/\r\n?/g, "\n")
+                .replace(/^(?:\s*%@[^\n]*\n)+/, "")
+                .trim();
+            if (abc) tunes.push({ abc: abc, title: entries[i].title || "" });
+        }
+        tunes.sort(function (a, b) {
+            const d = xNumber(a.abc) - xNumber(b.abc);
+            return d !== 0 ? d : compareTitles(a.title, b.title);
+        });
+        const header = [
+            "%@ title: " + (tb.name || ""),
+            "%@ author: " + (tb.author || "-"),
+            "%@ lastupdate: " + (tb.lastupdate || todayStr()),
+            "%@ iconcolor: " + (tb.iconcolor || "#bbbbbb")
+        ].join("\n");
+        return tunes.length
+            ? header + "\n\n" + tunes.map(function (t) { return t.abc; }).join("\n\n") + "\n"
+            : header + "\n";
+    }
+
+    function downloadText(fileName, text) {
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 1000);
+    }
+
+    function exportTunebookAbct(tbIndex) {
+        return enqueueOp(async function () {
+            const bridge = getBridge();
+            if (!bridge) return;
+            const tb = bridge.getTunebooks()[tbIndex];
+            if (!tb) return;
+            const text = await buildTunebookAbct(tb);
+            downloadText(safeFileName(tb.name) + ".abct", text);
+        });
+    }
+
+    function decorateTunebookList() {
+        const listEl = document.querySelector(".tuneBookList");
+        if (!listEl) return;
+        const items = listEl.children;
+        for (let i = 0; i < items.length; i++) {
+            const li = items[i];
+            if (li.tagName !== "LI" || li.querySelector(".tuneBookListShare")) continue;
+            const img = document.createElement("img");
+            img.className = "tuneBookListShare";
+            img.src = "img/share90.png";
+            img.title = "Export .abct";
+            img.alt = "Export .abct";
+            img.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const idx = Array.prototype.indexOf.call(listEl.children, li);
+                if (idx >= 0) exportTunebookAbct(idx);
+            });
+            const trash = li.querySelector('img[src*="trash"]');
+            if (trash) {
+                li.insertBefore(img, trash);
+            } else {
+                li.appendChild(img);
+            }
+        }
     }
 
     function bindEvents() {
@@ -660,12 +754,17 @@
             }
         });
 
-        ui.editBtn.addEventListener("click", function () {
+        ui.setListSelect.addEventListener("change", function () {
             const dbk = ui.setListSelect.value;
             if (dbk) openEditorForDbk(dbk);
         });
 
         ui.deleteBtn.addEventListener("click", handleDeleteSetList);
+
+        ["fileInput", "setlistFileInput"].forEach(function (id) {
+            const input = document.getElementById(id);
+            if (input) input.addEventListener("change", closeEditor);
+        });
 
         ui.editNameInput.addEventListener("change", handleRenameSetList);
         ui.editNameInput.addEventListener("keydown", function (e) {
@@ -714,6 +813,7 @@
         const syncFromExternal = function () {
             const bridge = getBridge();
             if (!bridge) return;
+            decorateTunebookList();
             if (editingDbk && !bridge.getTunebooks().some(function (t) { return t.dbk === editingDbk; })) {
                 closeEditor();
             }
@@ -741,5 +841,6 @@
         bindEvents();
         refreshSetListDropdown();
         refreshTbFilter();
+        decorateTunebookList();
     };
 })();
