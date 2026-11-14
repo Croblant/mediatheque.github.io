@@ -410,6 +410,10 @@ div {
   */  
 }
 
+body.rs-hide-tempo .abcjs-tempo {
+  display: none; /* tempo par défaut (120) injecté pour la lecture : non affiché */
+}
+
 .abcjs-tempo {
   /*text-anchor="start"*/
   transform: translatex(-2.5em);

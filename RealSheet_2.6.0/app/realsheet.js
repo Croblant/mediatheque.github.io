@@ -2783,7 +2783,10 @@ function load() {
         // Tempo par défaut : si aucun champ Q: n'est présent, utiliser 120.
         // Mesures composées en /8 (6/8, 9/8, 12/8) : noire pointée ;
         // autres mesures : noire.
+        // Le tempo par défaut sert uniquement à la lecture : on masque son affichage (classe sur body).
+        document.body.classList.remove("rs-hide-tempo");
         if (!/^\s*Q\s*:/mi.test(r)) {
+            document.body.classList.add("rs-hide-tempo");
             const meter = r.match(/^\s*M\s*:\s*(\d+)\s*\/\s*(\d+)/mi);
             const compound = meter && Number(meter[2]) === 8 && Number(meter[1]) % 3 === 0;
             const defaultTempo = compound ? "Q:3/8=120" : "Q:1/4=120";
