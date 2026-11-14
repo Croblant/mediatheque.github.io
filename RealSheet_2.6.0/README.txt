@@ -54,3 +54,9 @@ MODIFICATIONS
     disponibles dans Advanced options.
   - forum.html lit forum/forum.json (fetchAndRender dans forum.js). Les tunebooks pointent vers
     https://realsheet.net/forum/tunebooks/1_PD.json et 2_Jazz_Tunes.json ; liste de secours integree si forum.json est illisible.
+
+HEBERGEMENT (GitHub Pages) - tunebooks chiffres (1_PD, 2_Jazz_Tunes)
+  - app/filemode.js (mode http/https) : si api/getkey.php est absent (hebergement statique), la
+    demande de cle est envoyee directement a https://realsheet.net/api/getkey.php.
+  - Pour eviter aussi le CORS sur le tunebook : copier 1_PD.json (et 2_Jazz_Tunes.json) dans
+    forum/tunebooks/ ET les envoyer sur le depot GitHub. L'app les lit en priorite en local.
