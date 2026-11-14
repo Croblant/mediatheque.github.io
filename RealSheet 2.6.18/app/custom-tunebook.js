@@ -38,7 +38,7 @@
     }
 
     function isLocalSetListTb(tb) {
-        return !!(tb && tb.source === "" && String(tb.dbk || "").startsWith("f:"));
+        return !!(tb && tb.setlist === true && tb.source === "" && String(tb.dbk || "").startsWith("f:"));
     }
 
     function stripNumberPrefix(title) {
@@ -450,6 +450,7 @@
                 author: "-",
                 lastupdate: todayStr(),
                 iconcolor: "#bbbbbb",
+                setlist: true,
                 dbk: targetDbk
             };
 

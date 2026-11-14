@@ -3570,7 +3570,7 @@ function load() {
                 n[x(712, "BpOI") + "t"] = o;
                 let a = document["createElem" + x(1286, "Y5Id")](W[x(2217, "nZal")]);
                 a[x(3091, "BpOI")] = W[x(967, "nZal")],
-                $W[e][x(3168, "aTa9")][x(3097, "%@lP") + "e"]()[x(1689, "WhQq")](W[x(3220, "XrhR")]) ? a.src = W[x(484, "Ujmd")] : W.aMpHn($W[e].source, "") ? a[x(1362, "nZal")] = W[x(3215, "Ujmd")] : a[x(1538, "3X$y")] = W[x(3025, "Ujmd")],
+                $W[e][x(3168, "aTa9")][x(3097, "%@lP") + "e"]()[x(1689, "WhQq")](W[x(3220, "XrhR")]) ? a.src = W[x(484, "Ujmd")] : W.aMpHn($W[e].source, "") ? a[x(1362, "nZal")] = !0 === $W[e].setlist ? "img/book-local.png" : W[x(3215, "Ujmd")] : a[x(1538, "3X$y")] = W[x(3025, "Ujmd")],
                 a[x(991, "3X$y") + x(642, "D[9b")](W[x(645, "a6o!")], function($) {
                     let x = {
                         Kekqv: function($, x) {
