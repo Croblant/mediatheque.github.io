@@ -30,35 +30,7 @@
   <script src="installmenu.js?v=5"></script><!--onglet Install (web, Android/iOS)-->
   <script src="playback.js"></script>
   <script>window.tricktrack = window.tricktrack || function () {};</script>
-  <script>
-    // Android Chrome: prevent pull-to-refresh only when a downward gesture
-    // starts at the very top of the document. Normal scrolling is untouched.
-    (function () {
-      var startY = null;
-      document.addEventListener("touchstart", function (e) {
-        if (!e.touches || e.touches.length !== 1) { startY = null; return; }
-        startY = e.touches[0].clientY;
-      }, { passive: true, capture: true });
 
-      document.addEventListener("touchmove", function (e) {
-        if (startY === null || !e.touches || e.touches.length !== 1) return;
-        var currentY = e.touches[0].clientY;
-        var scrollTop = Math.max(
-          window.scrollY || 0,
-          document.documentElement.scrollTop || 0,
-          document.body ? document.body.scrollTop || 0 : 0
-        );
-        // A finger moving down while the document is already at y=0
-        // cannot scroll the content; stop Chrome interpreting it as refresh.
-        if (scrollTop <= 1 && currentY > startY + 3 && e.cancelable) {
-          e.preventDefault();
-        }
-      }, { passive: false, capture: true });
-
-      document.addEventListener("touchend", function () { startY = null; }, { passive: true, capture: true });
-      document.addEventListener("touchcancel", function () { startY = null; }, { passive: true, capture: true });
-    })();
-  </script>
   <title>Realsheet +</title>
 </head>
 <body onload="load()"  translate="no">
