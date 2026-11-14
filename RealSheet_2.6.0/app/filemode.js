@@ -15,11 +15,9 @@
   var REMOTE_GETKEY = 'https://realsheet.net/api/getkey.php';
 
   // --- MODE HEBERGE (http/https, ex. GitHub Pages) -------------------------------------------
-  // Hors file://, le script ne touche qu'a deux choses, avec repli automatique :
-  //   a) api/getkey.php n'existe pas sur un hebergement statique (404/405) -> la demande de cle
-  //      est renvoyee directement a realsheet.net ;
-  //   b) un tunebook https://realsheet.net/forum/tunebooks/<x>.json est d'abord cherche en copie
-  //      locale forum/tunebooks/<x>.json (meme origine, pas de souci CORS), sinon l'URL distante.
+  // Hors file://, le script ne touche qu'a une chose : api/getkey.php n'existe pas sur un
+  // hebergement statique (404/405) -> la demande de cle est renvoyee directement a realsheet.net.
+  // Les tunebooks sont toujours lus sur l'URL indiquee dans forum.json.
   if (location.protocol !== 'file:') {
     var hostedFetch = window.fetch.bind(window);
     window.fetch = function (input, init) {
@@ -39,13 +37,6 @@
         });
       }
 
-      var m = /^https:\/\/realsheet\.net\/forum\/tunebooks\/([^\/?#]+\.json)$/i.exec(abs.origin + abs.pathname);
-      if (m) {
-        var local = new URL('../forum/tunebooks/' + m[1], location.href).href;
-        return hostedFetch(local + (abs.search || ''), init).then(function (r) {
-          return r.ok ? r : hostedFetch(input, init);
-        }, function () { return hostedFetch(input, init); });
-      }
       return hostedFetch(input, init);
     };
     return;

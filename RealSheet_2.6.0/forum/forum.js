@@ -87,10 +87,12 @@ async function importTb(URL, title) {
       if (r.ok) src = proxyUrl;
       else throw new Error("proxy " + r.status);
     } catch (e) {
-      try {
-        const l = await fetch(localUrl, { method: "HEAD", cache: "no-store" });
-        if (l.ok) src = localUrl;
-      } catch (e2) { /* on garde l'URL distante */ }
+      if (window.location.protocol === "file:") {
+        try {
+          const l = await fetch(localUrl, { method: "HEAD", cache: "no-store" });
+          if (l.ok) src = localUrl;
+        } catch (e2) { /* on garde l'URL distante */ }
+      }
     }
   }
   window.location.href = linkToApp + "?i=" + encodeURIComponent(src) + "&n=" + encodeURIComponent(title || "");
