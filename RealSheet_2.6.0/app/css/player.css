@@ -106,6 +106,7 @@ body::after {
 
 html, body {
   touch-action: pan-x pan-y; /*no pinch zoom*/
+  overscroll-behavior-y: none !important; /* Android: prevent pull-to-refresh while keeping normal scrolling */
   margin: 0 !important;
   padding: 0 !important;  
   color: #000000 !important;
@@ -115,7 +116,8 @@ html, body {
 
 
 html {
-  overscroll-behavior: none; /*disable pull-to-refresh*/
+  overscroll-behavior: none;
+  overscroll-behavior-y: none !important; /*disable Android pull-to-refresh on the root scroller*/
   /*overscroll-behavior-x: none; */ /* prevents browsing back / forward by sliding from outside the screen */
   overflow: auto;
   /*
