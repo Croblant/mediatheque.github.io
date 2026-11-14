@@ -1474,6 +1474,15 @@ tr:nth-child(even) {
   .sidenav a {font-size: 18px;}
 }
 
+/* PC (souris + ecran en paysage) : la partition ne remplit plus toute la largeur, elle devenait trop
+   grosse. Sa largeur est plafonnee a la hauteur de la fenetre (ajustez 100vh : 85vh = plus petit,
+   120vh = plus grand). Telephone, tablette et iPad (ecran tactile) gardent la pleine largeur. */
+@media screen and (orientation: landscape) and (hover: hover) and (pointer: fine) {
+  #paperframe {
+    max-width: min(100%, 100vh);
+  }
+}
+
 @media print {
   #measureWrap{
     display: none !important;
