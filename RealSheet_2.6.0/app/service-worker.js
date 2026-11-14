@@ -1,5 +1,5 @@
 // Change version to force cache replacement on all clients
-const CACHE_NAME = 'app-cache-v53-repeattext';
+const CACHE_NAME = 'app-cache-v55-keyboardfix';
 const NETWORK_TIMEOUT_MS = 3000;   // max wait for network on static files
 const OFFLINE_WINDOW_MS = 15000;   // after a failure, serve from cache first for this long
 
@@ -38,6 +38,7 @@ const PRECACHE_URLS = [
   'img/trash.png',
   'img/r-book.png',
   'img/book-globe.png',
+  'img/book-local.png',
   'img/refresh256.png',
   'img/back.png',
   'img/fit-vertical.png',

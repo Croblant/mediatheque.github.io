@@ -778,7 +778,7 @@ function load() {
         aMpHn: function($, W) {
             return $ == W
         },
-        QvQOv: $(1522, "a6o!") + $(2273, "odVM") + "g",
+        QvQOv: "img/book-local.png",
         VtIpj: "img/book-g" + $(1234, "nZal"),
         MxLQH: $(2658, "vaC7") + $(2887, "&YWU"),
         AHnup: $(1504, "@^8^") + $(167, "rE2t"),
@@ -1738,7 +1738,7 @@ function load() {
     }(),
     W.lNWFq(function x() {
         let c = $;
-        for (var t = ["img/heartx" + c(1613, "BpOI"), W.uMpSO, W[c(3399, "zl#a")], W[c(1775, "Ywe]")], c(2246, "FqBi") + c(3200, "odVM"), W.IqYOW, W[c(3412, "Ujmd")], W[c(1470, "odVM")], W.WDimc, c(979, "rE2t") + c(1460, "Lcks")], e = 0; e < t[c(2142, "Wd6I")]; e++)
+        for (var t = ["img/heartx" + c(1613, "BpOI"), W.uMpSO, W.QvQOv, W[c(3399, "zl#a")], W[c(1775, "Ywe]")], c(2246, "FqBi") + c(3200, "odVM"), W.IqYOW, W[c(3412, "Ujmd")], W[c(1470, "odVM")], W.WDimc, c(979, "rE2t") + c(1460, "Lcks")], e = 0; e < t[c(2142, "Wd6I")]; e++)
             W[c(1493, "F&3u")](R, t[e])
     }),
     W.EGLSH(W[$(1726, "tD*E")], navigator) && navigator["serviceWor" + $(2708, "zl#a")][$(248, "rE2t")](W[$(2422, "EeTo")])[$(2382, "rE2t")](W => console[$(2677, "46vM")]($(303, "BpOI") + $(770, "EeTo") + $(1182, "&YWU") + $(200, "BpOI"), W[$(1975, "d*bF")]))[$(2956, "$uvt")](W => console.error("[Service W" + $(2948, "bmf6") + "istration " + $(1374, "Wd6I"), W)),
@@ -4691,6 +4691,11 @@ function load() {
             const rsBtn = document.getElementById("rsPlaybackPlay");
             const rsPlaying = !!window.__rsPlaybackSynth || !!(rsBtn && rsBtn.dataset.playing === "true");
             if (rsPlaying && window.__rsLastRenderW === window.innerWidth) return;
+            // patched: sur Android, le clavier virtuel provoque un resize (hauteur seule) quand on touche un champ
+            // texte (recherche, URL...) -> redessin de la partition. On l'ignore tant qu'un champ de saisie a le
+            // focus et que la largeur n'a pas change.
+            const rsAe = document.activeElement;
+            if (rsAe && /^(INPUT|TEXTAREA|SELECT)$/.test(rsAe.tagName) && window.__rsLastRenderW === window.innerWidth) return;
         }
         W[x(251, "3X$y")]($w)
     }),

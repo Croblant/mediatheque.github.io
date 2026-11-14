@@ -169,7 +169,7 @@
         <br>
         <div id="manageAdvanced" class="manageTunesSection div-hidden">
             Download a tunebook from external source<br>
-            <input type="text" placeholder="Tunebook URL" id="downloadURL">
+            <input type="text" placeholder="Tunebook URL" id="downloadURL" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <!--<div id="suggestionList">test</div>-->
             <button id="importListWeb">Download</button>
             <br><br>
@@ -194,7 +194,7 @@
           <button id="plusbutton" class="rightbutton"><img class="icon" src="img/edit.png" >&nbsp;&nbsp;Edit</button>
     
           <div id="sideNavFilter">
-            <input type="search" id="tuneSearch" placeholder="Title or composer" spellcheck="false" maxlength="40"></input><br>
+            <input type="search" id="tuneSearch" placeholder="Title or composer" autocomplete="off" autocorrect="off" autocapitalize="off" enterkeyhint="search" spellcheck="false" maxlength="40"></input><br>
             in <select id="tbFilter">                  
                 <option value="all">All tunes</option>
                 <option value="fav">Favorites</option>
@@ -340,7 +340,7 @@
   </div>
 
   <div class="settings-layer" id="editor" aria-hidden="true"> 
-    <textarea id="abctext" spellcheck="false">
+    <textarea id="abctext" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </textarea>
   </div>
 
