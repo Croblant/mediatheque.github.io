@@ -1,0 +1,24 @@
+le but est de permettre d'éditer les fichiers abc dans realsheet
+
+lorsqu'un tune est ouvert ajouter icone edit.png tout à droite de play
+si on clic dessus on passe en mode edit on ne peut plus changer de partition en swapant
+
+Si on clic dessus ouvre une fenêtre en bas - barre de titre - partition sur 40% - fenetre d'édition sur max 40% (plus petit sur tablette ou si texte abc court) - barre de menu de l'édition en bas
+dans la fenetre d'édition il y a le code abc de la partition que l'on peut modifier
+si #Ed - title existe dans le tunebook local #Edit Tunes alors recharger #Ed - title.abc au lieu de title.abc 
+
+si on place le curseur à un endroit du code abc cela passe dans la partition la note avant le curseur et la note après le curseur en bleu comme lors du playback et cela scroll la partition pour que la zone en cours d'édition soit au milieu de la fenetre partition
+si on modifie le code abc cela regénère la partition sans recharger la page
+
+bouton dans le menu du bas : bouton save (icone save.png à créer dans le même style que les autres icones, symbole disquette) - bouton cancel - bouton delete (icone trash.png)
+
+bouton cancel annule les modifications = ferme la fenetre d'édition sans changer de fichier - swap à nouveau possible
+
+bouton save
+si le tunebook local #Edit Tunes n'existe pas le créer en abct
+si #Ed - title existe dans le tunebook local #Edit Tunes alors écraser #Ed - title avec le nouveau code abc édité
+si #Ed - title n'existe pas dans le tunebook local #Edit Tunes alors créer #Ed - title avec le nouveau code abc édité
+ne pas modifier title.abc
+
+bouton delete 
+si #Ed - title existe dans le tunebook local #Edit Tunes alors supprimer #Ed - title du tunebook local #Edit Tunes
