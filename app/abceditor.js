@@ -11,6 +11,7 @@
     var textarea = null;
     var btnSave = null;
     var btnCancel = null;
+    var savedPaperStyle = null; /* styles inline de #paperframe avant le mode édition (marginTop posé par main.js au démarrage) */
     var btnDelete = null;
     var editBtn = null;
 
@@ -191,6 +192,91 @@
         }
     }
 
+    var PAPER_STYLE_PROPS = ["position", "left", "right", "top", "height", "marginTop"];
+
+    function savePaperStyle() {
+        if (savedPaperStyle) return; /* déjà sauvegardé : ne pas écraser avec les styles du mode édition */
+        var pf = document.getElementById("paperframe");
+        if (!pf) return;
+        savedPaperStyle = {};
+        PAPER_STYLE_PROPS.forEach(function (p) { savedPaperStyle[p] = pf.style[p] || ""; });
+    }
+
+    function restorePaperStyle() {
+        var pf = document.getElementById("paperframe");
+        if (!pf) { savedPaperStyle = null; return; }
+        if (savedPaperStyle) {
+            PAPER_STYLE_PROPS.forEach(function (p) { pf.style[p] = savedPaperStyle[p]; });
+        } else {
+            /* Pas de sauvegarde : remettre le décalage sous la barre de menu (fixe) comme au démarrage */
+            PAPER_STYLE_PROPS.forEach(function (p) { pf.style[p] = ""; });
+            var menu = document.getElementById("menu");
+            if (menu) pf.style.marginTop = menu.clientHeight + "px";
+        }
+        savedPaperStyle = null;
+        pf.scrollTop = 0;
+    }
+
+    /* Firefox peut garder une zone blanche (cache de peinture périmé) après le retour du mode édition :
+       on force un reflow + repaint complet du cadre de la partition. */
+    function forceRepaint() {
+        var pf = document.getElementById("paperframe");
+        if (!pf) return;
+        /* 0) Firefox garde l'ancien cadre « fixed » du mode édition (zone de défilement / couche) :
+              on retire puis réinsère le nœud pour détruire et reconstruire ses frames */
+        try {
+            var par = pf.parentNode, nxt = pf.nextSibling;
+            if (par) {
+                par.removeChild(pf);
+                par.insertBefore(pf, nxt);
+            }
+            var prevOv = pf.style.overflow, prevPos = pf.style.position;
+            pf.style.overflow = "visible";
+            pf.style.position = "relative";
+            void pf.offsetHeight;
+            pf.style.overflow = prevOv;
+            pf.style.position = prevPos;
+        } catch (e) {}
+        /* 1) reflow complet du cadre */
+        var prevDisplay = pf.style.display;
+        pf.style.display = "none";
+        void pf.offsetHeight;
+        pf.style.display = prevDisplay;
+        /* 2) nouvelle couche de composition pour la partition */
+        var paper = document.getElementById("paper");
+        if (paper) {
+            paper.style.transform = "translateZ(0)";
+            void paper.offsetHeight;
+            paper.style.transform = "";
+        }
+        /* 3) vrai défilement asynchrone de 1 px (aller puis retour sur deux images) : dans Firefox, la zone blanche
+              disparaît dès qu'on défile, car cela recalcule la zone peinte de la fenêtre */
+        try {
+            var sy = window.scrollY || 0;
+            var alt = sy > 0 ? sy - 1 : sy + 1;
+            window.scrollTo(0, alt);
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    if (!window.__rsAbcEditMode) window.scrollTo(0, sy);
+                });
+            });
+        } catch (e) {}
+        /* 4) invalider la peinture du cadre */
+        pf.style.opacity = "0.999";
+        requestAnimationFrame(function () {
+            pf.style.opacity = "";
+        });
+    }
+
+    /* Repaint étalé dans le temps : Firefox peut re-périmer la zone après un premier repaint */
+    function scheduleRepaints() {
+        [0, 120, 400, 900].forEach(function (d) {
+            setTimeout(function () {
+                if (!window.__rsAbcEditMode) forceRepaint();
+            }, d);
+        });
+    }
+
     function updateLayoutSizing() {
         if (!editDock || !textarea) return;
         var menu = document.getElementById("menu");
@@ -222,17 +308,10 @@
         editDock.style.bottom = bottomOffset + "px";
         editDock.style.maxHeight = maxDockH + "px";
 
-        var paperframe = document.getElementById("paperframe");
-        if (paperframe) {
-            var dockH = targetH + barH;
-            var paperH = Math.max(80, availH - dockH);
-            paperframe.style.position = "fixed";
-            paperframe.style.left = "0";
-            paperframe.style.right = "0";
-            paperframe.style.top = Math.round(visibleTop) + "px";
-            paperframe.style.marginTop = "0";
-            paperframe.style.height = paperH + "px";
-        }
+        /* La partition reste dans le flux normal de la page (plus de position:fixed ni de cadre défilant, qui laissaient
+           une zone blanche dans Firefox au retour) : on réserve seulement la place du dock en bas de la page. */
+        var dockH = targetH + barH;
+        document.documentElement.style.setProperty("--rs-edit-dock-h", dockH + "px");
     }
 
     function clearHighlights() {
@@ -540,15 +619,17 @@
             }
         }
         if (targetEl && noteRect && (selStart > 0 || selEnd > 0)) {
-            var paperframe = document.getElementById("paperframe");
-            if (paperframe && paperframe.clientHeight > 0) {
-                var frameRect = paperframe.getBoundingClientRect();
-                var offsetInFrame = (noteRect.top - frameRect.top) + paperframe.scrollTop;
-                var targetTop = Math.max(0, offsetInFrame - (paperframe.clientHeight / 2) + (noteRect.height / 2));
-                if (scrollBehavior === "smooth" && typeof paperframe.scrollTo === "function") {
-                    paperframe.scrollTo({ top: targetTop, behavior: "smooth" });
-                } else {
-                    paperframe.scrollTop = targetTop;
+            /* Centre la note dans la zone visible (entre le menu et le dock) en faisant défiler la page */
+            var menuEl = document.getElementById("menu");
+            var topLimit = menuEl ? menuEl.getBoundingClientRect().bottom : 0;
+            var bottomLimit = editDock ? editDock.getBoundingClientRect().top : (window.innerHeight || 800);
+            if (bottomLimit > topLimit + 40) {
+                var wantedY = topLimit + (bottomLimit - topLimit) / 2;
+                var delta = (noteRect.top + noteRect.height / 2) - wantedY;
+                if (Math.abs(delta) > 4) {
+                    try {
+                        window.scrollBy({ top: delta, left: 0, behavior: scrollBehavior === "smooth" ? "smooth" : "auto" });
+                    } catch (e) { window.scrollBy(0, delta); }
                 }
             }
         }
@@ -610,6 +691,7 @@
 
             textarea.value = loadedAbc;
             updateDeleteButtonState(bridge);
+            savePaperStyle();
             updateLayoutSizing();
 
             if (edEntry && edEntry.id !== currentId) {
@@ -639,7 +721,11 @@
         }
         window.__rsAbcEditMode = false;
         editingLiveAbc = null;
+        document.documentElement.style.removeProperty("--rs-edit-dock-h");
         editingOriginalId = null;
+        if (textarea && typeof textarea.blur === "function") {
+            try { textarea.blur(); } catch (e) {}
+        }
         document.body.classList.remove("rs-abc-edit-mode");
         if (editDock) {
             editDock.setAttribute("aria-hidden", "true");
@@ -648,16 +734,8 @@
         }
         clearHighlights();
 
-        var paperframe = document.getElementById("paperframe");
-        if (paperframe) {
-            paperframe.style.position = "";
-            paperframe.style.left = "";
-            paperframe.style.right = "";
-            paperframe.style.top = "";
-            paperframe.style.height = "";
-            paperframe.style.marginTop = "";
-            paperframe.scrollTop = 0;
-        }
+        restorePaperStyle();
+        try { window.scrollTo(0, 0); } catch (e) {}
 
         if (redraw) {
             var bridge = getBridge();
@@ -665,6 +743,23 @@
                 window.__rsLastRenderW = -1;
                 await bridge.redrawSheet();
             }
+            scheduleRepaints();
+            setTimeout(function () {
+                if (window.__rsAbcEditMode) return;
+                try { window.scrollTo(0, 0); } catch (e) {}
+                var pf = document.getElementById("paperframe");
+                if (pf) pf.scrollTop = 0;
+                var b = getBridge();
+                if (b) {
+                    window.__rsLastRenderW = -1;
+                    var pr = b.redrawSheet();
+                    if (pr && typeof pr.then === "function") {
+                        pr.then(scheduleRepaints);
+                    } else {
+                        setTimeout(scheduleRepaints, 150);
+                    }
+                }
+            }, 300);
         }
     }
 

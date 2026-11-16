@@ -1795,18 +1795,8 @@ tr:nth-child(even) {
 }
 
 body.rs-abc-edit-mode {
-  overflow: hidden;
-}
-
-body.rs-abc-edit-mode #paperframe {
-  margin-top: var(--rs-edit-menu-h, 44px);
-  height: 40vh;
-  height: 40dvh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  box-sizing: border-box;
-  padding-bottom: 12px;
+  /* place réservée au dock d'édition fixé en bas ; la partition défile avec la page */
+  padding-bottom: var(--rs-edit-dock-h, 40vh);
 }
 
 body.rs-abc-edit-mode #spaceBelowSheet,
