@@ -621,7 +621,7 @@
         if (targetEl && noteRect && (selStart > 0 || selEnd > 0)) {
             /* Centre la note dans la zone visible (entre le menu et le dock) en faisant défiler la page */
             var menuEl = document.getElementById("menu");
-            var topLimit = menuEl ? menuEl.getBoundingClientRect().bottom : 0;
+            var topLimit = menuEl ? Math.round(menuEl.getBoundingClientRect().height) : 0; /* hauteur (pas le bas) : le menu se masque quand on défile */
             var bottomLimit = editDock ? editDock.getBoundingClientRect().top : (window.innerHeight || 800);
             if (bottomLimit > topLimit + 40) {
                 var wantedY = topLimit + (bottomLimit - topLimit) / 2;

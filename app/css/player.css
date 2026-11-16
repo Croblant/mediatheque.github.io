@@ -1794,12 +1794,13 @@ tr:nth-child(even) {
   object-fit: contain;
 }
 
-body.rs-abc-edit-mode {
-  /* place réservée au dock d'édition fixé en bas ; la partition défile avec la page */
-  padding-bottom: var(--rs-edit-dock-h, 40vh);
+/* Place réservée sous la partition en mode édition (html/body ont padding:0 !important, on utilise donc
+   #spaceBelowSheet) : hauteur du dock + une demi-fenêtre pour pouvoir centrer aussi les dernières notes. */
+body.rs-abc-edit-mode #spaceBelowSheet {
+  display: block !important;
+  height: calc(var(--rs-edit-dock-h, 40vh) + 50vh);
 }
 
-body.rs-abc-edit-mode #spaceBelowSheet,
 body.rs-abc-edit-mode .rs-nav-arrow {
   display: none !important;
 }
