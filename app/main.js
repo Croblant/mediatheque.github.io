@@ -2868,7 +2868,7 @@ function load() {
                 return W[_0x30a7(150, "46vM")]($)
             }
         };
-        if (window[c(1943, "$Dit")](0, 0),
+        if ((window.__rsAbcEditMode ? void 0 : window[c(1943, "$Dit")](0, 0)),
         document[c(555, "vaC7") + c(2720, "D[9b")](W[c(3478, "rE2t")]).innerHTML = "",
         $L() || W[c(786, "nZal")](localStorage[c(1238, "tD*E") + c(1698, "KmSU") + "m"], 0)) {
             W[c(3177, "XrhR")](W4, 0);
@@ -2883,7 +2883,8 @@ function load() {
         $G = d[c(1702, "E5Z[")],
         localStorage[c(313, "Ywe]") + c(773, "@^8^") + "me"] = $G;
         try {
-            e = await W[c(270, "[gbw")]($s, o)
+            const rsEditAbc = typeof window.__rsGetEditAbc === "function" ? window.__rsGetEditAbc(o) : null;
+            e = rsEditAbc !== null && rsEditAbc !== undefined ? rsEditAbc : await W[c(270, "[gbw")]($s, o)
         } catch (n) {
             console[c(134, "cX%i")](W[c(721, "@^8^")], n),
             W4(0),
@@ -3287,6 +3288,9 @@ function load() {
                 }
                 window.__rsCurrentVisual = m[0];
                 window.__rsCurrentAbc = s;
+                if (typeof window.__rsOnSheetRendered === "function") {
+                    try { window.__rsOnSheetRendered(); } catch (rsEditRenderErr) {}
+                }
                 const rsStatus = document.getElementById("rsPlaybackStatus");
                 const rsPlaybackButton = document.getElementById("rsPlaybackPlay");
                 const rsIsPlaying = !!window.__rsPlaybackSynth && !!(rsPlaybackButton && rsPlaybackButton.dataset.playing === "true");
@@ -3457,12 +3461,13 @@ function load() {
         d.innerHTML = "",
         $d = [];
         let C = $g(n)
+          , rsUseLyrics = n.trim().length > 10 && C !== ""
           , s = document[x(877, "@^8^") + x(2811, "tD*E") + "nt"]();
         for (var R = 0; W[x(606, "d*bF")](R, f[x(771, "zl#a")]); R++) {
             let _ = f[R].title
               , v = f[R].ID
               , composer = (($i.find(z => z.id === v) || {}).composer || "").trim();
-            if (W[x(3099, "ys&Z")](C, "") && !$g(_)[x(1099, "GPuU")](C) && !$g(composer).includes(C))
+            if (W[x(3099, "ys&Z")](C, "") && !$g(_)[x(1099, "GPuU")](C) && !$g(composer).includes(C) && !(rsUseLyrics && window.rsMatchLyricsCached && window.rsMatchLyricsCached(v, C)))
                 continue;
             let q = document[x(1006, "Wd6I") + x(1260, "D*Sp")]("a");
             q[x(1434, "$Dit") + "t"] = _,
@@ -3473,7 +3478,10 @@ function load() {
             s[x(824, "[gbw") + "d"](q),
             $d[x(2511, "tI#]")](v)
         }
-        d[x(2745, "e@lT") + "d"](s)
+        d[x(2745, "e@lT") + "d"](s);
+        if (window.rsSearchLyricsAsync) {
+            window.rsSearchLyricsAsync(rsUseLyrics ? f.map(it => it.ID) : null, C, $B, "tunes");
+        }
     }
     function $D(x) {
         let c = $;

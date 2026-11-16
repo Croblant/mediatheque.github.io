@@ -211,7 +211,9 @@
         const index = bridge.getIndex();
         const tbList = bridge.getTunebooks();
         const filterVal = ui.tbFilter.value || "all";
-        const queryNorm = normalizeSearch(ui.tuneSearch ? ui.tuneSearch.value : "");
+        const rawQuery = ui.tuneSearch ? ui.tuneSearch.value : "";
+        const queryNorm = normalizeSearch(rawQuery);
+        const useLyrics = rawQuery.trim().length > 10 && queryNorm !== "";
 
         ui.searchResults.innerHTML = "";
         if (!index.length) {
@@ -264,7 +266,7 @@
             const item = items[i];
             const title = String(item.title || "");
             const composer = String(item.composer || "").trim();
-            if (queryNorm !== "" && !normalizeSearch(title).includes(queryNorm) && !normalizeSearch(composer).includes(queryNorm)) {
+            if (queryNorm !== "" && !normalizeSearch(title).includes(queryNorm) && !normalizeSearch(composer).includes(queryNorm) && !(useLyrics && window.rsMatchLyricsCached && window.rsMatchLyricsCached(item.id, queryNorm))) {
                 continue;
             }
             const a = document.createElement("a");
@@ -283,6 +285,9 @@
             ui.searchResults.appendChild(empty);
         } else {
             ui.searchResults.appendChild(frag);
+        }
+        if (window.rsSearchLyricsAsync) {
+            window.rsSearchLyricsAsync(useLyrics ? items.map(function (it) { return it.id; }) : null, queryNorm, renderSearchResults, "setlist");
         }
     }
 

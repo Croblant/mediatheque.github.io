@@ -198,11 +198,12 @@ div {
   position: fixed;
   top: 0px;
   width: 100%;
+  box-sizing: border-box;
   z-index: 50;
   max-width: 100%;
   background: #aacccc; 
   padding-left: 1em;
-  padding-right:0em;
+  padding-right: 42px;
   padding-top: 0.5em;
   padding-bottom:0.5em;
   border: 0px;
@@ -1765,4 +1766,140 @@ tr:nth-child(even) {
   align-items: center;
   gap: 8px;
   margin: 12px 0 8px 0;
+}
+
+/* ABC Editor */
+#rsAbcEditBtn {
+  display: none;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  width: 1.7em;
+  height: 1.7em;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 55;
+}
+
+#rsAbcEditBtn img {
+  display: block;
+  width: 1em;
+  height: 1em;
+  object-fit: contain;
+}
+
+body.rs-abc-edit-mode {
+  overflow: hidden;
+}
+
+body.rs-abc-edit-mode #paperframe {
+  margin-top: var(--rs-edit-menu-h, 44px);
+  height: 40vh;
+  height: 40dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  padding-bottom: 12px;
+}
+
+body.rs-abc-edit-mode #spaceBelowSheet,
+body.rs-abc-edit-mode .rs-nav-arrow {
+  display: none !important;
+}
+
+#rsAbcEditDock {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  flex-direction: column;
+  background: #f4f6f6;
+  border-top: 2px solid #aacccc;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+  max-height: 40vh;
+  max-height: 40dvh;
+}
+
+@media (min-width: 768px) {
+  #rsAbcEditDock {
+    max-height: 30vh;
+    max-height: 30dvh;
+  }
+}
+
+body.rs-abc-edit-mode #rsAbcEditDock {
+  display: flex;
+}
+
+#rsAbcEditTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: #ffffff;
+  color: #111111;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-y: auto;
+}
+
+#rsAbcEditBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #aacccc;
+  border-top: 1px solid #8fb8b8;
+  flex-shrink: 0;
+}
+
+.rs-abc-edit-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111111;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rs-abc-edit-action:hover:not(:disabled) {
+  background: #eef5f5;
+}
+
+.rs-abc-edit-action:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.rs-abc-edit-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  object-fit: contain;
+}
+
+@media print {
+  #rsAbcEditBtn,
+  #rsAbcEditDock {
+    display: none !important;
+  }
 }

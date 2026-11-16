@@ -137,5 +137,73 @@
     ev.preventDefault();
   }, true);
 
+  var rsLyricsCache = new Map();
+  var rsLyricsSearchTokens = {};
+
+  function rsNormSearch(text) {
+    var b = typeof window !== 'undefined' && window.__rsBridge;
+    if (b && typeof b.normalizeSearch === 'function') {
+      return b.normalizeSearch(String(text || ''));
+    }
+    return String(text || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  }
+
+  window.rsExtractNormalizedLyrics = function (abcText) {
+    if (typeof abcText !== 'string' || !abcText) return '';
+    var lines = abcText.match(/^[ \t]*[wW][ \t]*:.*$/gm);
+    if (!lines || !lines.length) return '';
+    var joined = lines.map(function (line) {
+      return line.replace(/^[ \t]*[wW][ \t]*:[ \t]*/, '').replace(/\\-/g, '').replace(/-/g, '');
+    }).join(' ');
+    return rsNormSearch(joined);
+  };
+
+  window.rsMatchLyricsCached = function (id, queryNorm) {
+    if (!id || !queryNorm) return false;
+    var cached = rsLyricsCache.get(id);
+    return typeof cached === 'string' && cached.length > 0 && cached.indexOf(queryNorm) !== -1;
+  };
+
+  window.rsClearLyricsCache = function (id) {
+    if (id) rsLyricsCache.delete(id);
+    else rsLyricsCache.clear();
+  };
+
+  window.rsSearchLyricsAsync = function (ids, queryNorm, onMatch, scope) {
+    var key = scope || 'tunes';
+    var token = (rsLyricsSearchTokens[key] || 0) + 1;
+    rsLyricsSearchTokens[key] = token;
+    var bridge = typeof window !== 'undefined' && window.__rsBridge;
+    if (!bridge || typeof bridge.decryptTune !== 'function' || !ids || !ids.length || !queryNorm) return;
+
+    var pending = [];
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i] && !rsLyricsCache.has(ids[i])) pending.push(ids[i]);
+    }
+    if (!pending.length) return;
+
+    (async function () {
+      var foundNew = false;
+      for (var j = 0; j < pending.length; j++) {
+        if (rsLyricsSearchTokens[key] !== token) return;
+        var id = pending[j];
+        if (!rsLyricsCache.has(id)) {
+          try {
+            var raw = await bridge.decryptTune(id);
+            if (rsLyricsSearchTokens[key] !== token) return;
+            var norm = window.rsExtractNormalizedLyrics(String(raw || ''));
+            rsLyricsCache.set(id, norm);
+            if (norm && norm.indexOf(queryNorm) !== -1) foundNew = true;
+          } catch (e) {
+            rsLyricsCache.set(id, '');
+          }
+        }
+      }
+      if (foundNew && rsLyricsSearchTokens[key] === token && typeof onMatch === 'function') {
+        onMatch();
+      }
+    })();
+  };
+
   if (typeof module !== 'undefined' && module.exports) module.exports = { rsTxtImportName: rsTxtImportName };
 })();

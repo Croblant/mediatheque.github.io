@@ -1,5 +1,5 @@
 // Change version to force cache replacement on all clients
-const CACHE_NAME = 'app-cache-v90-v2.6.24.6';
+const CACHE_NAME = 'app-cache-v99-v2.7.3';
 const NETWORK_TIMEOUT_MS = 3000;   // max wait for network on static files
 const OFFLINE_WINDOW_MS = 15000;   // after a failure, serve from cache first for this long
 
@@ -19,6 +19,7 @@ const PRECACHE_URLS = [
   'main.html',
   'css/player.css',
   'main.js',
+  'abceditor.js',
   'rs-extras.js',
   'custom-tunebook.js',
   'emptylines.js',
@@ -58,6 +59,7 @@ const PRECACHE_URLS = [
   'img/png-100.png',
   'img/info.png',
   'img/edit.png',
+  'img/save.png',
   'img/plus90.png',
   'img/up.png',
   'img/down.png',
