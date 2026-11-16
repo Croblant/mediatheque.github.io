@@ -201,10 +201,12 @@
         var vvH = vv ? vv.height : (window.innerHeight || document.documentElement.clientHeight || 800);
         var vvTop = vv ? vv.offsetTop : 0;
         var layoutH = window.innerHeight || document.documentElement.clientHeight || vvH;
-        var bottomOffset = Math.max(0, Math.round(layoutH - (vvTop + vvH)));
+        var visibleTop = Math.max(menuH, vvTop);
+        var visibleBottom = vvTop + vvH;
+        var bottomOffset = Math.max(0, Math.round(layoutH - visibleBottom));
 
         var isTablet = window.matchMedia && window.matchMedia("(min-width: 768px)").matches;
-        var availH = Math.max(140, Math.floor(vvH - menuH));
+        var availH = Math.max(120, Math.floor(visibleBottom - visibleTop));
         var maxDockRatio = isTablet ? 0.35 : 0.48;
         var maxDockH = Math.max(100, Math.floor(availH * maxDockRatio));
         var barEl = document.getElementById("rsAbcEditBar");
@@ -227,7 +229,7 @@
             paperframe.style.position = "fixed";
             paperframe.style.left = "0";
             paperframe.style.right = "0";
-            paperframe.style.top = Math.round(vvTop + menuH) + "px";
+            paperframe.style.top = Math.round(visibleTop) + "px";
             paperframe.style.marginTop = "0";
             paperframe.style.height = paperH + "px";
         }
@@ -537,7 +539,7 @@
                 break;
             }
         }
-        if (targetEl && noteRect) {
+        if (targetEl && noteRect && (selStart > 0 || selEnd > 0)) {
             var paperframe = document.getElementById("paperframe");
             if (paperframe && paperframe.clientHeight > 0) {
                 var frameRect = paperframe.getBoundingClientRect();
