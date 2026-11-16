@@ -173,8 +173,22 @@
         window.addEventListener("resize", function () {
             if (window.__rsAbcEditMode) {
                 updateLayoutSizing();
+                highlightAtCursor("auto");
             }
         });
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", function () {
+                if (window.__rsAbcEditMode) {
+                    updateLayoutSizing();
+                    highlightAtCursor("auto");
+                }
+            });
+            window.visualViewport.addEventListener("scroll", function () {
+                if (window.__rsAbcEditMode) {
+                    updateLayoutSizing();
+                }
+            });
+        }
     }
 
     function updateLayoutSizing() {
@@ -183,18 +197,36 @@
         var menuH = menu ? Math.ceil(menu.getBoundingClientRect().height) : 44;
         document.documentElement.style.setProperty("--rs-edit-menu-h", menuH + "px");
 
-        var vh = window.innerHeight || document.documentElement.clientHeight || 800;
+        var vv = window.visualViewport;
+        var vvH = vv ? vv.height : (window.innerHeight || document.documentElement.clientHeight || 800);
+        var vvTop = vv ? vv.offsetTop : 0;
+        var layoutH = window.innerHeight || document.documentElement.clientHeight || vvH;
+        var bottomOffset = Math.max(0, Math.round(layoutH - (vvTop + vvH)));
+
         var isTablet = window.matchMedia && window.matchMedia("(min-width: 768px)").matches;
-        var maxDockRatio = isTablet ? 0.30 : 0.40;
+        var availH = Math.max(140, Math.floor(vvH - menuH));
+        var maxDockRatio = isTablet ? 0.35 : 0.48;
+        var maxDockH = Math.max(100, Math.floor(availH * maxDockRatio));
         var barEl = document.getElementById("rsAbcEditBar");
-        var barH = barEl ? Math.ceil(barEl.getBoundingClientRect().height) : 48;
-        var maxTextareaH = Math.max(80, Math.floor(vh * maxDockRatio) - barH);
+        var barH = barEl ? Math.ceil(barEl.getBoundingClientRect().height) : 44;
+        var maxTextareaH = Math.max(56, maxDockH - barH);
 
         textarea.style.height = "auto";
         var contentH = textarea.scrollHeight;
-        var targetH = Math.min(maxTextareaH, Math.max(72, contentH));
+        var targetH = Math.min(maxTextareaH, Math.max(56, contentH));
         textarea.style.height = targetH + "px";
         textarea.style.maxHeight = maxTextareaH + "px";
+
+        editDock.style.bottom = bottomOffset + "px";
+        editDock.style.maxHeight = maxDockH + "px";
+
+        var paperframe = document.getElementById("paperframe");
+        if (paperframe) {
+            var dockH = targetH + barH;
+            var paperH = Math.max(80, availH - dockH);
+            paperframe.style.marginTop = menuH + "px";
+            paperframe.style.height = paperH + "px";
+        }
     }
 
     function clearHighlights() {
@@ -491,18 +523,27 @@
             }
         });
 
-        var targetEl = highlightedEls.length ? highlightedEls[0] : null;
-        if (targetEl) {
+        var targetEl = null;
+        var noteRect = null;
+        for (var hi = 0; hi < highlightedEls.length; hi++) {
+            var r = highlightedEls[hi].getBoundingClientRect();
+            if (r && (r.height > 0 || r.width > 0)) {
+                targetEl = highlightedEls[hi];
+                noteRect = r;
+                break;
+            }
+        }
+        if (targetEl && noteRect) {
             var paperframe = document.getElementById("paperframe");
             if (paperframe && paperframe.clientHeight > 0) {
                 var frameRect = paperframe.getBoundingClientRect();
-                var noteRect = targetEl.getBoundingClientRect();
                 var offsetInFrame = (noteRect.top - frameRect.top) + paperframe.scrollTop;
-                var targetTop = offsetInFrame - (paperframe.clientHeight / 2) + (noteRect.height / 2);
-                paperframe.scrollTo({
-                    top: Math.max(0, targetTop),
-                    behavior: scrollBehavior === "smooth" ? "smooth" : "auto"
-                });
+                var targetTop = Math.max(0, offsetInFrame - (paperframe.clientHeight / 2) + (noteRect.height / 2));
+                if (scrollBehavior === "smooth" && typeof paperframe.scrollTo === "function") {
+                    paperframe.scrollTo({ top: targetTop, behavior: "smooth" });
+                } else {
+                    paperframe.scrollTop = targetTop;
+                }
             }
         }
     }
@@ -588,11 +629,19 @@
         editingLiveAbc = null;
         editingOriginalId = null;
         document.body.classList.remove("rs-abc-edit-mode");
-        if (editDock) editDock.setAttribute("aria-hidden", "true");
+        if (editDock) {
+            editDock.setAttribute("aria-hidden", "true");
+            editDock.style.bottom = "";
+            editDock.style.maxHeight = "";
+        }
         clearHighlights();
 
         var paperframe = document.getElementById("paperframe");
-        if (paperframe) paperframe.scrollTop = 0;
+        if (paperframe) {
+            paperframe.style.height = "";
+            paperframe.style.marginTop = "";
+            paperframe.scrollTop = 0;
+        }
 
         if (redraw) {
             var bridge = getBridge();
