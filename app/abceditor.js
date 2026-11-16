@@ -224,7 +224,11 @@
         if (paperframe) {
             var dockH = targetH + barH;
             var paperH = Math.max(80, availH - dockH);
-            paperframe.style.marginTop = menuH + "px";
+            paperframe.style.position = "fixed";
+            paperframe.style.left = "0";
+            paperframe.style.right = "0";
+            paperframe.style.top = Math.round(vvTop + menuH) + "px";
+            paperframe.style.marginTop = "0";
             paperframe.style.height = paperH + "px";
         }
     }
@@ -613,6 +617,12 @@
                 highlightAtCursor("auto");
             }
             textarea.focus();
+            setTimeout(function () {
+                if (window.__rsAbcEditMode) {
+                    updateLayoutSizing();
+                    highlightAtCursor("auto");
+                }
+            }, 300);
         } catch (err) {
             console.error("ABC Editor open error:", err);
         } finally {
@@ -638,6 +648,10 @@
 
         var paperframe = document.getElementById("paperframe");
         if (paperframe) {
+            paperframe.style.position = "";
+            paperframe.style.left = "";
+            paperframe.style.right = "";
+            paperframe.style.top = "";
             paperframe.style.height = "";
             paperframe.style.marginTop = "";
             paperframe.scrollTop = 0;
