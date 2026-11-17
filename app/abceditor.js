@@ -20,6 +20,7 @@
     var editingEdTitle = "";
     var editingLiveAbc = null;
     var renderTimer = null;
+    var topExtra = 0;             /* espace ajouté au-dessus de la partition pour pouvoir centrer les premières notes */
     var renderInFlight = false;   /* redessin de la partition en cours */
     var lastInputTs = 0;          /* dernière saisie (ms) */
     var lastSizing = null;        /* dernières mesures de updateLayoutSizing */
@@ -206,7 +207,7 @@
         }
     }
 
-    var PAPER_STYLE_PROPS = ["position", "left", "right", "top", "height", "marginTop"];
+    var PAPER_STYLE_PROPS = ["position", "left", "right", "top", "height", "marginTop", "paddingTop"];
 
     function savePaperStyle() {
         if (savedPaperStyle) return; /* déjà sauvegardé : ne pas écraser avec les styles du mode édition */
@@ -228,6 +229,8 @@
             if (menu) pf.style.marginTop = menu.clientHeight + "px";
         }
         savedPaperStyle = null;
+        topExtra = 0;
+        pf.style.paddingTop = "";
         pf.scrollTop = 0;
     }
 
@@ -723,6 +726,18 @@
             if (bottomLimit > topLimit + 40) {
                 var wantedY = topLimit + (bottomLimit - topLimit) / 2;
                 var delta = (noteRect.top + noteRect.height / 2) - wantedY;
+                /* Première(s) note(s) : pas assez de place au-dessus pour les centrer (scrollY ne peut pas être < 0).
+                   On ajoute un espace en haut de la partition (retiré à la sortie du mode édition). */
+                var room = window.pageYOffset || document.documentElement.scrollTop || 0;
+                if (delta < -4 && -delta > room + 1) {
+                    var pfEl = document.getElementById("paperframe");
+                    if (pfEl) {
+                        topExtra += Math.min(Math.ceil(-delta - room), window.innerHeight || 800);
+                        pfEl.style.paddingTop = topExtra + "px";
+                        var nr = targetEl.getBoundingClientRect();
+                        delta = (nr.top + nr.height / 2) - wantedY;
+                    }
+                }
                 if (Math.abs(delta) > 4) {
                     try {
                         window.scrollBy({ top: delta, left: 0, behavior: scrollBehavior === "smooth" ? "smooth" : "auto" });
