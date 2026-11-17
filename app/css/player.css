@@ -1894,3 +1894,8 @@ body.rs-abc-edit-mode #rsAbcEditDock {
     display: none !important;
   }
 }
+
+@media (max-width: 400px) {
+  #rsAbcEditBar { gap: 4px; padding: 6px 6px; }
+  .rs-abc-edit-action { padding: 6px 8px; gap: 4px; font-size: 13px; }
+}

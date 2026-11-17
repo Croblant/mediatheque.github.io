@@ -9,7 +9,7 @@
 
     var editDock = null;
     var textarea = null;
-    var btnSave = null;
+    var btnSave = null, btnTempo = null;
     var btnCancel = null;
     var savedPaperStyle = null; /* styles inline de #paperframe avant le mode édition (marginTop posé par main.js au démarrage) */
     var btnDelete = null;
@@ -141,6 +141,15 @@
         btnSave.className = "rs-abc-edit-action";
         btnSave.innerHTML = '<img src="img/save.png" class="rs-abc-edit-icon" alt=""><span>Save</span>';
 
+        btnTempo = document.createElement("button");
+        btnTempo.type = "button";
+        btnTempo.id = "rsAbcEditTempo";
+        btnTempo.className = "rs-abc-edit-action";
+        btnTempo.innerHTML = '<span>\u2669 Tempo</span>';
+        btnTempo.setAttribute("aria-label", "Tempo");
+        /* ne pas retirer le focus du textarea (le clavier reste ouvert) */
+        btnTempo.addEventListener("mousedown", function (e) { e.preventDefault(); });
+
         btnCancel = document.createElement("button");
         btnCancel.type = "button";
         btnCancel.id = "rsAbcEditCancel";
@@ -153,7 +162,7 @@
         btnDelete.className = "rs-abc-edit-action";
         btnDelete.innerHTML = '<img src="img/trash.png" class="rs-abc-edit-icon" alt=""><span>Delete</span>';
 
-        bar.append(btnSave, btnCancel, btnDelete);
+        bar.append(btnSave, btnTempo, btnCancel, btnDelete);
         editDock.append(textarea, bar);
         document.body.appendChild(editDock);
 
@@ -172,6 +181,7 @@
         });
 
         btnSave.addEventListener("click", handleSave);
+        btnTempo.addEventListener("click", handleTempo);
         btnCancel.addEventListener("click", function () { closeEditMode(true); });
         btnDelete.addEventListener("click", handleDelete);
 
@@ -570,6 +580,60 @@
             if (aIdx >= 0 && mappedNoteIndices.indexOf(aIdx) === -1) mappedNoteIndices.push(aIdx);
         }
         return mappedNoteIndices;
+    }
+
+    /* ---- Bouton Tempo : place le curseur sur la ligne de tempo, ou en crée une (Q:1/4=120 / Q:3/8=120 en ternaire) ---- */
+    function scrollTextareaToIndex(idx) {
+        try {
+            var before = textarea.value.slice(0, idx);
+            var lineNo = before.split("\n").length - 1;
+            var lh = parseFloat(window.getComputedStyle(textarea).lineHeight) || 18;
+            var y = lineNo * lh;
+            if (y < textarea.scrollTop || y > textarea.scrollTop + textarea.clientHeight - lh * 2) {
+                textarea.scrollTop = Math.max(0, y - textarea.clientHeight / 2);
+            }
+        } catch (e) {}
+    }
+
+    function handleTempo() {
+        if (!window.__rsAbcEditMode || !textarea) return;
+        var text = textarea.value;
+        /* Priorité : ligne Q: active (une ligne %Q: commentée est ignorée), sinon ligne R: 1/4=… */
+        var found = /^[ \t]*(Q:[^\n]*)/m.exec(text) ||
+                    /^[ \t]*(R:[ \t]*(?:"[^"\n]*"[ \t]*)?\d+\/\d+[ \t]*=[^\n]*)/m.exec(text);
+        var caret;
+        if (found) {
+            /* tempo déjà présent : curseur en fin de cette ligne */
+            caret = found.index + found[0].replace(/[ \t\r]+$/, "").length;
+            textarea.focus();
+            textarea.setSelectionRange(caret, caret);
+        } else {
+            var ternary = false;
+            var mm = /^M:[ \t]*(\d+)\/(\d+)/m.exec(text);
+            if (mm && parseInt(mm[2], 10) === 8 && parseInt(mm[1], 10) % 3 === 0) ternary = true;
+            var line = ternary ? "Q:3/8=120" : "Q:1/4=120";
+            /* insertion avant la ligne K: (dernier champ de l'en-tête) ; sinon après M:, sinon en tête */
+            var insertAt = 0;
+            var kk = /^K:/m.exec(text);
+            var mLine = /^M:[^\n]*\n?/m.exec(text);
+            if (kk) insertAt = kk.index;
+            else if (mLine) insertAt = mLine.index + mLine[0].length;
+            var prefix = "";
+            if (insertAt > 0 && text.charAt(insertAt - 1) !== "\n") prefix = "\n";
+            var ins = prefix + line + "\n";
+            textarea.focus();
+            textarea.setSelectionRange(insertAt, insertAt);
+            var ok = false;
+            try { ok = document.execCommand("insertText", false, ins); } catch (e) { ok = false; }
+            if (!ok || textarea.value.indexOf(line) === -1) {
+                textarea.setRangeText(ins, insertAt, insertAt, "end");
+                textarea.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+            caret = insertAt + prefix.length + line.length;
+            textarea.setSelectionRange(caret, caret);
+        }
+        scrollTextareaToIndex(caret);
+        updateLayoutSizing();
     }
 
     function highlightAtCursor(scrollBehavior) {
