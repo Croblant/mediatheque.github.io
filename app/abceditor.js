@@ -420,9 +420,22 @@
                 continue;
             }
             if (ch === "|") {
+                // Chaque barre verticale dans les paroles représente une mesure à sauter.
+                // Ne pas regrouper ||| en un seul séparateur : cela décale l'alignement
+                // des syllabes avec les notes (notamment les secondes lignes de paroles).
                 var barStart = i;
-                while (i < len && (lineText[i] === "|" || lineText[i] === ":" || lineText[i] === "]")) i++;
+                i++;
+                // Une ouverture de reprise |: reste un seul séparateur.
+                if (i < len && lineText[i] === ":") i++;
                 tokens.push({ isBar: true, startChar: lineStart + barStart, endChar: lineStart + i });
+                continue;
+            }
+            if (ch === ":" || ch === "]") {
+                var closeBarStart = i;
+                i++;
+                // Une fermeture de reprise :| ou ]| reste un seul séparateur.
+                if (i < len && lineText[i] === "|") i++;
+                tokens.push({ isBar: true, startChar: lineStart + closeBarStart, endChar: lineStart + i });
                 continue;
             }
             if (ch === "_" || ch === "*") {
@@ -539,10 +552,10 @@
             for (var t = 0; t < tokens.length; t++) {
                 var tok = tokens[t];
                 if (tok.isBar) {
-                    if (t > 0 || sylInMeas > 0) {
-                        measIdx++;
-                        sylInMeas = 0;
-                    }
+                    // Chaque barre avance d'une mesure, y compris les barres
+                    // initiales (||| = trois mesures à sauter avant « jours »).
+                    measIdx++;
+                    sylInMeas = 0;
                     tok.noteIdx = -1;
                 } else {
                     var measNotes = noteMeasures[Math.min(measIdx, noteMeasures.length - 1)] || [];
