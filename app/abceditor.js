@@ -20,6 +20,10 @@
     var editingEdTitle = "";
     var editingLiveAbc = null;
     var renderTimer = null;
+    var renderInFlight = false;   /* redessin de la partition en cours */
+    var lastInputTs = 0;          /* dernière saisie (ms) */
+    var lastSizing = null;        /* dernières mesures de updateLayoutSizing */
+    var measureTa = null;         /* textarea invisible pour mesurer la hauteur sans toucher au vrai */
     var opBusy = false;
 
     function getBridge() {
@@ -299,9 +303,27 @@
         var barH = barEl ? Math.ceil(barEl.getBoundingClientRect().height) : 44;
         var maxTextareaH = Math.max(56, maxDockH - barH);
 
-        textarea.style.height = "auto";
-        var contentH = textarea.scrollHeight;
+        /* Mesure sur un textarea invisible : réduire le vrai textarea à « auto » à chaque frappe fait réagir
+           Android (défilement de la page / du viewport visuel en boucle) */
+        if (!measureTa) {
+            measureTa = document.createElement("textarea");
+            measureTa.setAttribute("aria-hidden", "true");
+            measureTa.tabIndex = -1;
+            measureTa.readOnly = true;
+            measureTa.style.cssText = "position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;height:0;min-height:0;overflow:hidden;";
+            document.body.appendChild(measureTa);
+        }
+        var cs = window.getComputedStyle(textarea);
+        ["fontFamily", "fontSize", "fontWeight", "lineHeight", "letterSpacing", "whiteSpace", "wordBreak", "overflowWrap",
+         "paddingTop", "paddingBottom", "paddingLeft", "paddingRight", "borderTopWidth", "borderBottomWidth",
+         "borderLeftWidth", "borderRightWidth", "boxSizing", "tabSize"].forEach(function (k) { measureTa.style[k] = cs[k]; });
+        measureTa.style.width = textarea.getBoundingClientRect().width + "px";
+        measureTa.value = textarea.value;
+        var contentH = measureTa.scrollHeight;
         var targetH = Math.min(maxTextareaH, Math.max(56, contentH));
+        var sig = [menuH, vvTop, vvH, layoutH, targetH, maxTextareaH, barH].join("|");
+        if (lastSizing === sig) return; /* rien n'a changé : ne pas retoucher la mise en page */
+        lastSizing = sig;
         textarea.style.height = targetH + "px";
         textarea.style.maxHeight = maxTextareaH + "px";
 
@@ -552,6 +574,11 @@
 
     function highlightAtCursor(scrollBehavior) {
         if (!window.__rsAbcEditMode || !textarea) return;
+        /* Entre la frappe et le redessin, la partition affichée ne correspond plus au texte : les index de notes
+           seraient faux (défilement vers une mauvaise note). On attend le redessin, qui rappelle cette fonction. */
+        if (renderTimer || renderInFlight) return;
+        /* Pendant la saisie, pas de défilement « smooth » (il s'entrecroise avec les autres recentrages) */
+        if (Date.now() - lastInputTs < 1500) scrollBehavior = "auto";
         clearHighlights();
 
         var visual = window.__rsCurrentVisual;
@@ -623,6 +650,12 @@
             var menuEl = document.getElementById("menu");
             var topLimit = menuEl ? Math.round(menuEl.getBoundingClientRect().height) : 0; /* hauteur (pas le bas) : le menu se masque quand on défile */
             var bottomLimit = editDock ? editDock.getBoundingClientRect().top : (window.innerHeight || 800);
+            /* Android : avec le clavier, la zone réellement visible est le viewport visuel (décalé / réduit) */
+            var vv = window.visualViewport;
+            if (vv) {
+                topLimit = Math.max(topLimit, Math.round(vv.offsetTop));
+                bottomLimit = Math.min(bottomLimit, vv.offsetTop + vv.height);
+            }
             if (bottomLimit > topLimit + 40) {
                 var wantedY = topLimit + (bottomLimit - topLimit) / 2;
                 var delta = (noteRect.top + noteRect.height / 2) - wantedY;
@@ -638,6 +671,7 @@
     function onTextareaInput() {
         if (!window.__rsAbcEditMode || !textarea) return;
         editingLiveAbc = textarea.value;
+        lastInputTs = Date.now();
         updateLayoutSizing();
 
         if (renderTimer) clearTimeout(renderTimer);
@@ -646,11 +680,21 @@
             if (!window.__rsAbcEditMode) return;
             var bridge = getBridge();
             if (!bridge) return;
+            renderInFlight = true;
             try {
                 window.__rsLastRenderW = -1;
                 await bridge.redrawSheet();
             } catch (err) {
                 /* Laisser l'utilisateur continuer à taper si le code ABC est temporairement invalide */
+            }
+            renderInFlight = false;
+            /* Le redessin remplace le SVG (surlignage perdu, hauteur de page modifiée) : recentrer la note du curseur */
+            if (window.__rsAbcEditMode) {
+                highlightAtCursor("auto");
+                requestAnimationFrame(function () {
+                    highlightAtCursor("auto");
+                    setTimeout(function () { if (window.__rsAbcEditMode) highlightAtCursor("auto"); }, 120);
+                });
             }
         }, 180);
     }
@@ -674,6 +718,7 @@
         try {
             stopPlaybackIfRunning();
             buildUi();
+            lastSizing = null;
 
             editingOriginalId = currentId;
             editingBaseTitle = getBaseTitle(entry.title);
@@ -715,6 +760,7 @@
     }
 
     async function closeEditMode(redraw) {
+        lastSizing = null;
         if (renderTimer) {
             clearTimeout(renderTimer);
             renderTimer = null;
