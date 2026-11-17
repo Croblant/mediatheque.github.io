@@ -1,5 +1,5 @@
 // Change version to force cache replacement on all clients
-const CACHE_NAME = 'app-cache-v117-v2.7.11';
+const CACHE_NAME = 'app-cache-v121-v2.7.20';
 const NETWORK_TIMEOUT_MS = 3000;   // max wait for network on static files
 const OFFLINE_WINDOW_MS = 15000;   // after a failure, serve from cache first for this long
 
@@ -23,6 +23,7 @@ const PRECACHE_URLS = [
   'rs-extras.js',
   'custom-tunebook.js',
   'emptylines.js',
+  'chordnames.js',
   'navarrows.js',
   'filemode.js',
   'installmenu.js',

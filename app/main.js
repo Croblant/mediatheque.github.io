@@ -3013,6 +3013,9 @@ function load() {
                 partsbox: !0
             }
         });
+        // Remplacement visuel après interprétation ABCJS : Do/Fa restent du texte complet,
+        // sans être réinterprétés comme des accords D/F.
+        if (window.rsApplyChordNamesToSvg) window.rsApplyChordNamesToSvg();
         // patched: textes de reprise (D.C., D.S., Fine, Coda, Da Capo, Da Segno...) : abcjs leur donne la meme
         // classe que les autres annotations ; on marque ceux-ci pour les decaler (voir .abcjs-repeat dans player.css).
         try {

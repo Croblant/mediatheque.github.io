@@ -365,6 +365,12 @@ div {
   /*transform: translateY(.3em);*/  /*move down towards the staves*/ 
 } 
 
+
+/* Accords légèrement plus petits en notation française Do/Ré. */
+html.rs-solfege-chords .abcjs-chord {
+  font-size: 1em;
+}
+
 .abcjs-chord{ 
   /* Chord Symbols */
   font-family: 'Roboto','Noto Music','Helvetica','sans-serif';

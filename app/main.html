@@ -16,7 +16,7 @@
   <link rel="apple-touch-startup-image" href="img/ic_launcher-512.png">
   <link rel="icon" type="image/png" sizes="192x192" href="img/ic_launcher-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="img/ic_launcher-512.png">
-  <link rel="stylesheet" type="text/css" href="css/player.css?v=2.7.11-tempo" id="styles">
+  <link rel="stylesheet" type="text/css" href="css/player.css?v=2.7.18" id="styles">
   <link rel="manifest" href="manifest.json"/>
   <script src="filemode.js?v=3"></script><!--mode file:// (double-clic), inactif en http(s)-->
   <script src="lib/abc.js?v=1011-audio-repeats" type="text/javascript"></script>
@@ -32,6 +32,7 @@
   <script src="custom-tunebook.js?v=2.7.3"></script>
   <script src="navarrows.js?v=2.6.24.4"></script><!--fleches partition precedente/suivante (PC sans tactile)-->
   <script src="emptylines.js?v=2.6.24.5"></script><!--option Hide/Show empty lines-->
+  <script src="chordnames.js?v=2.7.20"></script><!--affichage des accords en lettres ou solfege-->
   <script src="installmenu.js?v=5"></script><!--onglet Install (web, Android/iOS)-->
   <script src="playback.js"></script>
   <script>window.tricktrack = window.tricktrack || function () {};</script>
@@ -163,7 +164,9 @@
             <hr class="menudivider">
             <a id="displayHideLyrics" href="#" ><img class="icon-sm"  src="img/hide-lyrics.png">Hide lyrics</a>
             <a id="displayHideEmptyLines" href="#"><img class="icon-sm" src="img/show-lyrics.png">Show empty lines</a>
-            <a id="displayLargeChords" href="#" ><img class="icon-sm"  src="img/large-chords.png">Large chords</a>
+            <a id="displayLargeChords" href="#" ><img class="icon-sm"  src="img/large-chords.png">Large Chords</a>
+            <a id="displayChordNames" href="#"><img class="icon-sm" src="img/comment-100.png">Do/Ré Chords</a>
+            <a id="displaySimplifyChords" href="#"><img class="icon-sm" src="img/large-chords.png">Simplify Chords</a>
             <a id="displayAllSharp" href="#"><img class="icon-sm" src="img/all-sharp.png">All #/b</a>
            </div>
         </div>
