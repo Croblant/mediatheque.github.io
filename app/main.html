@@ -27,7 +27,7 @@
   <script src="lib/UPNG.js"></script><!--PNG export-->
   <script src="lib/ua-parser.min.js"></script><!--browser/system detection-->
   <script src="rs-extras.js?v=2.7.3"></script><!--import .txt ; clés Ut 3/4 à hauteur sonore constante-->
-  <script src="main.js?v=2.7.3" type="text/javascript"></script>
+  <script src="main.js?v=2.7.26" type="text/javascript"></script>
   <script src="abceditor.js?v=2.7.11-tempo3"></script>
   <script src="custom-tunebook.js?v=2.7.3"></script>
   <script src="navarrows.js?v=2.6.24.4"></script><!--fleches partition precedente/suivante (PC sans tactile)-->
@@ -65,6 +65,27 @@
         window.__rsLastRenderW = -1;
         window.dispatchEvent(new Event('resize'));
       });
+
+      var miSharpItem = document.getElementById('displayMiSharp');
+      if (miSharpItem) {
+        function refreshMiSharp() {
+          var specialMiSharp = localStorage.getItem('rsMiSharpSpecial') === '1';
+          Array.prototype.slice.call(miSharpItem.childNodes).forEach(function (node) {
+            if (node.nodeType === Node.TEXT_NODE) node.remove();
+          });
+          miSharpItem.appendChild(document.createTextNode(specialMiSharp ? 'With Mi#' : 'No Mi#'));
+          miSharpItem.setAttribute('aria-pressed', specialMiSharp ? 'true' : 'false');
+        }
+        refreshMiSharp();
+        miSharpItem.addEventListener('click', function (event) {
+          event.preventDefault();
+          var specialMiSharp = localStorage.getItem('rsMiSharpSpecial') === '1';
+          localStorage.setItem('rsMiSharpSpecial', specialMiSharp ? '0' : '1');
+          refreshMiSharp();
+          window.__rsLastRenderW = -1;
+          window.dispatchEvent(new Event('resize'));
+        });
+      }
     });
   </script>
   <title>Realsheet +</title>
@@ -168,6 +189,7 @@
             <a id="displayChordNames" href="#"><img class="icon-sm" src="img/comment-100.png">Do/Ré Chords</a>
             <a id="displaySimplifyChords" href="#"><img class="icon-sm" src="img/large-chords.png">Simplify Chords</a>
             <a id="displayAllSharp" href="#"><img class="icon-sm" src="img/all-sharp.png">All #/b</a>
+            <a id="displayMiSharp" href="#"><img class="icon-sm" src="img/all-sharp.png">No Mi#</a>
            </div>
         </div>
         

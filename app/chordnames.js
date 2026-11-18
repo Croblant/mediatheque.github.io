@@ -41,6 +41,12 @@
             quality = "";                       // 6, 69, 7, 9, 13, add9, 7b9, 7#11...
         }
 
+        // Dans certains fichiers ABC, l'altération de la fondamentale est écrite
+        // après l'extension (ex. D7b). Après simplification, elle doit rester : Db.
+        // Ne pas confondre avec b9/#11, qui sont des altérations d'extension.
+        if (/^7[b♭]$/.test(q)) quality = "b";
+        else if (/^7[#♯]$/.test(q)) quality = "#";
+
         return head + quality + bass;
     }
 
@@ -92,7 +98,22 @@
             if (!el.dataset.rsOriginalChord) el.dataset.rsOriginalChord = el.textContent || "";
             var original = el.dataset.rsOriginalChord;
             var converted = convertChordLabel(original, toSolfege);
-            el.textContent = simplify ? simplifyChordLabel(converted, toSolfege) : converted;
+            var displayed = simplify ? simplifyChordLabel(converted, toSolfege) : converted;
+            el.textContent = "";
+            // Les altérations sont isolées dans des tspan pour rester lisibles
+            // sans agrandir les chiffres et les autres caractères de l'accord.
+            var parts = String(displayed).split(/([#b♯♭])/g);
+            parts.forEach(function (part) {
+                if (!part) return;
+                if (/^[#b♯♭]$/.test(part)) {
+                    var span = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+                    span.setAttribute("font-size", "1.35em");
+                    span.textContent = part;
+                    el.appendChild(span);
+                } else {
+                    el.appendChild(document.createTextNode(part));
+                }
+            });
         });
         applyChordSizes();
     };

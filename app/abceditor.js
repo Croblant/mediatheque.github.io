@@ -230,7 +230,9 @@
         }
         savedPaperStyle = null;
         topExtra = 0;
-        pf.style.paddingTop = "";
+        /* paddingTop fait partie du snapshot : ne pas l'écraser après restauration.
+           C'était la cause du titre remonté après Annuler lorsque l'édition avait
+           ajouté un espace au-dessus de la partition. */
         pf.scrollTop = 0;
     }
 

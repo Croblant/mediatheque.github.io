@@ -1,3 +1,92 @@
+// Special enharmonic spelling mode (menu label "With Mi#").
+// Converts E#/Fb/Cb/B# and double accidentals while respecting key signatures
+// and ABC accidental carry within each measure.
+window.rsNormalizeMiSharp = function (abc) {
+    if (typeof abc !== 'string') return abc;
+
+    var noteMap = {
+        // 3e valeur = décalage d'octave : B# = C de l'octave au-dessus, Cb = B de l'octave en dessous.
+        'E#':['F',0], 'E##':['F',1], 'Fb':['E',0], 'Fbb':['E',-1],
+        'Cb':['B',0,-1], 'Cbb':['B',-1,-1], 'B#':['C',0,1], 'B##':['C',1,1],
+        'C##':['D',0], 'D##':['E',0], 'F##':['G',0], 'G##':['A',0], 'A##':['B',0],
+        'Dbb':['C',0], 'Ebb':['D',0], 'Gbb':['F',0], 'Abb':['G',0], 'Bbb':['A',0]
+    };
+    var sharpKeys = {C:[],G:['F'],D:['F','C'],A:['F','C','G'],E:['F','C','G','D'],B:['F','C','G','D','A'],'F#':['F','C','G','D','A','E'],'C#':['F','C','G','D','A','E','B']};
+    var flatKeys = {F:['B'],'Bb':['B','E'],Eb:['B','E','A'],Ab:['B','E','A','D'],Db:['B','E','A','D','G'],Gb:['B','E','A','D','G','C'],Cb:['B','E','A','D','G','C','F']};
+    var majorForMinor = {A:'C',E:'G',B:'D','F#':'A','C#':'E','G#':'B','D#':'F#',D:'F',G:'Bb',C:'Eb',F:'Ab','Bb':'Db','Eb':'Gb','Ab':'Cb'};
+
+    function keySignature(raw) {
+        var m = /^\s*([A-Ga-g])([#b]?)(?:\s*(maj|ion|dor|phr|lyd|mix|aeo|loc|min|m))?/i.exec(raw || '');
+        if (!m) return {};
+        var tonic = m[1].toUpperCase() + (m[2] || '');
+        var mode = (m[3] || 'maj').toLowerCase();
+        if (mode === 'min' || mode === 'm' || mode === 'aeo') tonic = majorForMinor[tonic] || tonic;
+        var sig = {};
+        var sharps = sharpKeys[tonic], flats = flatKeys[tonic];
+        if (sharps) sharps.forEach(function(n){sig[n]=1;});
+        if (flats) flats.forEach(function(n){sig[n]=-1;});
+        return sig;
+    }
+    function normalizeChordText(text) {
+        return text.replace(/(^|[^A-Za-z])([A-G])([#b]{1,2})/g, function (_, pre, letter, acc) {
+            var mapped = noteMap[letter + acc];
+            return pre + (mapped ? mapped[0] + (mapped[1] > 0 ? '#' : mapped[1] < 0 ? 'b' : '') : letter + acc);
+        });
+    }
+
+    var sig = {}, active = {};
+    return abc.split('\n').map(function(line) {
+        var field = /^\s*K:\s*(.*)$/i.exec(line);
+        if (field) { sig = keySignature(field[1]); active = {}; return line; }
+        if (/^\s*[A-Za-z]:/.test(line) || /^\s*%/.test(line)) return line;
+        var out = '', i = 0;
+        while (i < line.length) {
+            var ch = line[i];
+            if (ch === '%') { out += line.slice(i); break; }
+            if (ch === '"') {
+                var q = line.indexOf('"', i + 1); if (q < 0) q = line.length;
+                out += '"' + normalizeChordText(line.slice(i + 1, q)) + (q < line.length ? '"' : '');
+                i = q < line.length ? q + 1 : q; continue;
+            }
+            if (ch === '[' && /^[A-Za-z]:/.test(line.slice(i + 1, i + 3))) {
+                var closeField = line.indexOf(']', i + 1); if (closeField < 0) closeField = line.length - 1;
+                var inlineKey = /^K:\s*(.*)$/i.exec(line.slice(i + 1, closeField));
+                if (inlineKey) { sig = keySignature(inlineKey[1]); active = {}; }
+                out += line.slice(i, closeField + 1); i = closeField + 1; continue;
+            }
+            if (ch === '|') { active = {}; out += ch; i++; while (i < line.length && /[|:\]]/.test(line[i])) out += line[i++]; continue; }
+            if (ch === '^' || ch === '_' || ch === '=') {
+                var j = i, accText = ch;
+                j++;
+                if (ch !== '=' && line[j] === ch) { accText += line[j++]; }
+                var original = line[j];
+                if (/[A-Ga-g]/.test(original || '')) {
+                    var a = accText === '=' ? 0 : accText[0] === '^' ? (accText.length === 2 ? 2 : 1) : (accText.length === 2 ? -2 : -1);
+                    var oct = original === original.toLowerCase() ? 1 : 0, k = j + 1;
+                    while (line[k] === ',' || line[k] === "'") { oct += line[k] === ',' ? -1 : 1; k++; }
+                    var map = noteMap[original.toUpperCase() + (a === 2 ? '##' : a === 1 ? '#' : a === -2 ? 'bb' : a === -1 ? 'b' : '')];
+                    if (map) {
+                        var target = map[0], wanted = map[1];
+                        // B#/B## s'écrivent C/C# une octave AU-DESSUS ; Cb/Cbb s'écrivent B/Bb une octave EN DESSOUS.
+                        // On recalcule donc la lettre (majuscule/minuscule) et les marques , ou ' selon l'octave cible.
+                        var targetOct = oct + (map[2] || 0);
+                        var key = target + targetOct;
+                        var effective = active[key] !== undefined ? active[key] : (sig[target] || 0);
+                        var prefix = wanted === effective ? '' : wanted === 0 ? '=' : wanted > 0 ? '^' : '_';
+                        var letterOut = targetOct >= 1 ? target.toLowerCase() : target;
+                        var marks = targetOct >= 2 ? new Array(targetOct).join("'") : targetOct <= -1 ? new Array(-targetOct + 1).join(',') : '';
+                        out += prefix + letterOut + marks;
+                        active[key] = wanted; i = k; continue;
+                    }
+                    var origKey = original.toUpperCase() + oct; active[origKey] = a;
+                    out += line.slice(i, k); i = k; continue;
+                }
+            }
+            out += ch; i++;
+        }
+        return out;
+    }).join('\n');
+};
 
 // Affiche explicitement les altérations de l'armure devant chaque note concernée.
 // Le texte d'en-tête (dont T:) est laissé intact ; les altérations accidentelles
@@ -2948,6 +3037,7 @@ function load() {
             return c = (c = (c = (c = (c = (c = (c = (c = (c = (c = c[t(1672, "FqBi")](/m7b5/g, "\xf87"))[t(2188, "tD*E")](/mmaj7/g, W[t(1973, "rE2t")]))[t(411, "$uvt")](/maj7/g, "Δ7"))[t(1981, "bKJJ")](/maj9/g, "Δ9"))[t(1922, "D[9b")](/-7/g, "m7"))[t(117, "KmSU")](/-6/g, "m6")).replace(/-9/g, "m9"))[t(2131, "vaC7")](/-11/g, W.phwha))[t(2789, "tI#]")](/°7"/g, 'dim7"')).replace(/°"/g, W[t(3078, "FqBi")])
         }(s = W[c(2122, "%@lP")]($N, s));
         if (localStorage.getItem("rsAllKeyAccidentals") === "1") s = window.rsApplyAllKeyAccidentals(s);
+        if (localStorage.getItem("rsMiSharpSpecial") === "1") s = window.rsNormalizeMiSharp(s);
         // ABC complet (portees vides incluses) : la lecture audio s'en sert, cf. window.rsAudioVisual (emptylines.js).
         window.__rsFullAbc = s;
         if (localStorage.getItem("rsHideEmptyLines") !== "0" && window.rsHideEmptyLines) s = window.rsHideEmptyLines(s);

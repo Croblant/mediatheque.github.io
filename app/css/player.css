@@ -380,6 +380,12 @@ html.rs-solfege-chords .abcjs-chord {
   transform: translateY(.5em); /*move down towards the staves*/
 } 
 
+/* Les bémols et dièses des symboles d'accords sont agrandis individuellement
+   par chordnames.js (tspan), sans modifier la taille du reste du symbole. */
+.abcjs-chord tspan {
+  font-weight: 600;
+}
+
 .abcjs-annotation{ 
   /* Other "^text" above and below staves  */
   font-family: 'Roboto','Noto Music','Helvetica','sans-serif';
@@ -1595,8 +1601,9 @@ tr:nth-child(even) {
   font-size: 11px !important;
 }
 
-/* Icône All #/b : taille stable et image entière dans le menu Staff Size. */
-#displayAllSharp img.icon-sm {
+/* Icônes All #/b et No Mi# : taille et alignement identiques dans Staff Size. */
+#displayAllSharp img.icon-sm,
+#displayMiSharp img.icon-sm {
   display: inline-block;
   width: 1.6em;
   height: 1.6em;
@@ -1611,13 +1618,18 @@ tr:nth-child(even) {
 #display-dropdown a#displayAllSharp,
 #display-dropdown a#displayAllSharp:visited,
 #display-dropdown a#displayAllSharp:focus,
-#display-dropdown a#displayAllSharp:active {
+#display-dropdown a#displayAllSharp:active,
+#display-dropdown a#displayMiSharp,
+#display-dropdown a#displayMiSharp:visited,
+#display-dropdown a#displayMiSharp:focus,
+#display-dropdown a#displayMiSharp:active {
   background-color: #fff !important;
   color: #000 !important;
   outline: none;
   box-shadow: none;
 }
-#display-dropdown a#displayAllSharp:hover {
+#display-dropdown a#displayAllSharp:hover,
+#display-dropdown a#displayMiSharp:hover {
   background-color: #ddd !important;
   color: #000 !important;
 }
