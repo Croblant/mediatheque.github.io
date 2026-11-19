@@ -207,6 +207,8 @@ div {
   padding-top: 0.5em;
   padding-bottom:0.5em;
   border: 0px;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
   transition: height 0.2s ease-in-out, top 0.2s ease-in-out;
 }
 
@@ -1592,6 +1594,31 @@ tr:nth-child(even) {
 
 }
 
+#rsPlaybackControls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 52;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+#rsPlaybackPlay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+  flex-shrink: 0;
+}
+#rsPlaybackPlay svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+  min-width: 1em;
+  min-height: 1em;
+}
 #rsPlaybackControls button:disabled {
   opacity: .6;
   cursor: wait;

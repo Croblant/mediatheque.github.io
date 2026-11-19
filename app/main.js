@@ -3134,26 +3134,21 @@ function load() {
                     rsToggle.id = "rsPlaybackPlay";
                     rsToggle.setAttribute("aria-label", "Lire la partition");
                     rsToggle.title = "Lire la partition";
-                    rsToggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
-                    rsToggle.style.cssText = "display:inline-flex;align-items:center;justify-content:center;width:1.5em;height:1.5em;padding:0;margin:0;border:0;background:transparent;color:#111;cursor:pointer;vertical-align:middle;";
-                    rsToggle.querySelector("svg").style.cssText = "display:block;width:1em;height:1em;";
+                    rsToggle.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="display:block;width:1em;height:1em;"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
+                    rsToggle.style.cssText = "display:inline-flex;align-items:center;justify-content:center;width:1.5em;height:1.5em;padding:0;margin:0;border:0;background:transparent;color:#111;cursor:pointer;vertical-align:middle;flex-shrink:0;";
                     const rsStatus = document.createElement("span");
                     rsStatus.id = "rsPlaybackStatus";
                     rsStatus.style.cssText = "display:none;";
                     rsControls.append(rsToggle, rsStatus);
 
                     const rsSetStopped = function () {
-                        rsToggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
-                        const svg = rsToggle.querySelector("svg");
-                        if (svg) svg.style.cssText = "display:block;width:1em;height:1em;";
+                        rsToggle.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="display:block;width:1em;height:1em;"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
                         rsToggle.setAttribute("aria-label", "Lire la partition");
                         rsToggle.title = "Lire la partition";
                         rsToggle.dataset.playing = "false";
                     };
                     const rsSetPlaying = function () {
-                        rsToggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/></svg>';
-                        const svg = rsToggle.querySelector("svg");
-                        if (svg) svg.style.cssText = "display:block;width:1em;height:1em;";
+                        rsToggle.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="display:block;width:1em;height:1em;"><rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/></svg>';
                         rsToggle.setAttribute("aria-label", "Arrêter la lecture");
                         rsToggle.title = "Arrêter la lecture";
                         rsToggle.dataset.playing = "true";
@@ -3364,11 +3359,14 @@ function load() {
                         }
                         const rsBtnReset = document.getElementById("rsPlaybackPlay");
                         if (rsBtnReset && rsBtnReset.dataset.playing === "true") {
-                            rsBtnReset.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
+                            rsBtnReset.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="display:block;width:1em;height:1em;"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>';
                             rsBtnReset.setAttribute("aria-label", "Lire la partition");
                             rsBtnReset.title = "Lire la partition";
                             rsBtnReset.dataset.playing = "false";
                         }
+                        const rsToolbar = document.getElementById("menu");
+                        if (rsToolbar && rsControls.parentNode !== rsToolbar) rsToolbar.appendChild(rsControls);
+                        rsControls.style.display = "inline-flex";
                         const rsOldStop = document.getElementById("rsPlaybackStop");
                         if (rsOldStop) rsOldStop.remove();
                         const rsOldPlay = document.getElementById("rsPlaybackPlay");

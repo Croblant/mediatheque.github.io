@@ -236,63 +236,20 @@
         pf.scrollTop = 0;
     }
 
-    /* Firefox peut garder une zone blanche (cache de peinture périmé) après le retour du mode édition :
-       on force un reflow + repaint complet du cadre de la partition. */
+    /* Légère invalidation de couche GPU après sortie du mode édition, sans masquer #paperframe
+       ni déclencher window.scrollTo (qui faisait clignoter #menu et sauter la partition). */
     function forceRepaint() {
-        var pf = document.getElementById("paperframe");
-        if (!pf) return;
-        /* 0) Firefox garde l'ancien cadre « fixed » du mode édition (zone de défilement / couche) :
-              on retire puis réinsère le nœud pour détruire et reconstruire ses frames */
-        try {
-            var par = pf.parentNode, nxt = pf.nextSibling;
-            if (par) {
-                par.removeChild(pf);
-                par.insertBefore(pf, nxt);
-            }
-            var prevOv = pf.style.overflow, prevPos = pf.style.position;
-            pf.style.overflow = "visible";
-            pf.style.position = "relative";
-            void pf.offsetHeight;
-            pf.style.overflow = prevOv;
-            pf.style.position = prevPos;
-        } catch (e) {}
-        /* 1) reflow complet du cadre */
-        var prevDisplay = pf.style.display;
-        pf.style.display = "none";
-        void pf.offsetHeight;
-        pf.style.display = prevDisplay;
-        /* 2) nouvelle couche de composition pour la partition */
         var paper = document.getElementById("paper");
-        if (paper) {
-            paper.style.transform = "translateZ(0)";
-            void paper.offsetHeight;
-            paper.style.transform = "";
-        }
-        /* 3) vrai défilement asynchrone de 1 px (aller puis retour sur deux images) : dans Firefox, la zone blanche
-              disparaît dès qu'on défile, car cela recalcule la zone peinte de la fenêtre */
-        try {
-            var sy = window.scrollY || 0;
-            var alt = sy > 0 ? sy - 1 : sy + 1;
-            window.scrollTo(0, alt);
-            requestAnimationFrame(function () {
-                requestAnimationFrame(function () {
-                    if (!window.__rsAbcEditMode) window.scrollTo(0, sy);
-                });
-            });
-        } catch (e) {}
-        /* 4) invalider la peinture du cadre */
-        pf.style.opacity = "0.999";
+        if (!paper) return;
+        paper.style.transform = "translateZ(0)";
         requestAnimationFrame(function () {
-            pf.style.opacity = "";
+            if (!window.__rsAbcEditMode) paper.style.transform = "";
         });
     }
 
-    /* Repaint étalé dans le temps : Firefox peut re-périmer la zone après un premier repaint */
     function scheduleRepaints() {
-        [0, 120, 400, 900].forEach(function (d) {
-            setTimeout(function () {
-                if (!window.__rsAbcEditMode) forceRepaint();
-            }, d);
+        requestAnimationFrame(function () {
+            if (!window.__rsAbcEditMode) forceRepaint();
         });
     }
 
@@ -886,17 +843,14 @@
             scheduleRepaints();
             setTimeout(function () {
                 if (window.__rsAbcEditMode) return;
-                try { window.scrollTo(0, 0); } catch (e) {}
-                var pf = document.getElementById("paperframe");
-                if (pf) pf.scrollTop = 0;
                 var b = getBridge();
-                if (b) {
+                if (b && window.__rsLastRenderW !== window.innerWidth) {
                     window.__rsLastRenderW = -1;
                     var pr = b.redrawSheet();
                     if (pr && typeof pr.then === "function") {
                         pr.then(scheduleRepaints);
                     } else {
-                        setTimeout(scheduleRepaints, 150);
+                        scheduleRepaints();
                     }
                 }
             }, 300);

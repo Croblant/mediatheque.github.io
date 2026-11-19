@@ -35,6 +35,16 @@
     return null;
   }
 
+  function isSafari() {
+    var ua = navigator.userAgent || '';
+    return /safari/i.test(ua) && !/chrome|crios|crmo|fxios|edgios|edg|opr|opera|android/i.test(ua);
+  }
+
+  function isMacSafari() {
+    var ua = navigator.userAgent || '';
+    return isSafari() && /macintosh/i.test(ua) && !(navigator.maxTouchPoints > 1);
+  }
+
   // Deja lancee en tant qu'app installee (PWA ou raccourci ecran d'accueil) ?
   function isStandalone() {
     try {
@@ -48,7 +58,7 @@
   }
 
   function showTab() {
-    return isWebLaunch() && !!mobilePlatform() && !isStandalone();
+    return isWebLaunch() && (!!mobilePlatform() || isMacSafari()) && !isStandalone();
   }
 
   // --- Service worker ----------------------------------------------------------
@@ -134,12 +144,75 @@
     }
   }
 
+  function isFrenchUi() {
+    var lang = '';
+    try {
+      lang = localStorage.getItem('RealSheetLang') || document.documentElement.lang || navigator.language || '';
+    } catch (e) {
+      lang = navigator.language || '';
+    }
+    return /^fr/i.test(String(lang));
+  }
+
+  // Remplit #installIos avec des instructions visuelles adaptees a Safari (iOS ou macOS)
+  // et un bouton d'acces direct au menu Partager natif quand navigator.share est disponible.
+  function populateSafariInstructions() {
+    var box = document.getElementById('installIos');
+    if (!box) return;
+    var fr = isFrenchUi();
+    var mac = isMacSafari();
+    var canShare = !!(navigator && typeof navigator.share === 'function');
+
+    var title = mac
+      ? (fr ? 'Installer RealSheet avec Safari (Mac)' : 'Install RealSheet with Safari (Mac)')
+      : (fr ? 'Installer RealSheet avec Safari (iPhone / iPad)' : 'Install RealSheet with Safari (iPhone / iPad)');
+
+    var stepsHtml;
+    if (mac) {
+      stepsHtml = fr
+        ? '<b>1. Ouvrez le menu Partager</b> <img src="img/share90.png" class="iconInstall" alt="Partager"> dans la barre Safari (ou le menu <b>Fichier</b>)<br><br>' +
+          '<b>2. Choisissez « Ajouter au Dock… »</b><br><br>' +
+          'Ouvrez ensuite RealSheet depuis le Dock comme une application.'
+        : '<b>1. Click the Share button</b> <img src="img/share90.png" class="iconInstall" alt="Share"> in Safari (or open the <b>File</b> menu)<br><br>' +
+          '<b>2. Select "Add to Dock…"</b><br><br>' +
+          'Then launch RealSheet directly from your Dock.';
+    } else {
+      stepsHtml = fr
+        ? '<b>1. Appuyez sur le bouton Partager</b> <img src="img/share90.png" class="iconInstall" alt="Partager"> en bas (ou en haut) de Safari<br><br>' +
+          '<b>2. Faites défiler et choisissez « Sur l’écran d’accueil »</b> <img src="img/plus90.png" class="iconInstall" alt="+"><br><br>' +
+          '<b>3. Appuyez sur « Ajouter »</b>, puis fermez cet onglet et ouvrez RealSheet depuis son icône.'
+        : '<b>1. Tap the Share button</b> <img src="img/share90.png" class="iconInstall" alt="Share"> in Safari<br><br>' +
+          '<b>2. Scroll down and tap "Add to Home Screen"</b> <img src="img/plus90.png" class="iconInstall" alt="+"><br><br>' +
+          '<b>3. Tap "Add"</b>, then close this tab and open RealSheet from its Home Screen icon.';
+    }
+
+    var shareBtnHtml = (!mac && canShare)
+      ? '<br><br><button type="button" id="installSafariShareBtn" class="bluebutton">' +
+        (fr ? 'Ouvrir le menu Partager' : 'Open Share Menu') + '</button>'
+      : '';
+
+    var noteHtml = (!mac && !isSafari())
+      ? (fr
+          ? 'Remarque : sur iPhone/iPad, utilisez <b>Safari</b> si « Sur l’écran d’accueil » n’apparaît pas dans votre navigateur actuel.'
+          : 'Note: on iPhone/iPad, use <b>Safari</b> if "Add to Home Screen" is not available in your current browser.')
+      : (fr
+          ? 'Remarque : Safari sur iOS/macOS n’affiche pas de fenêtre d’installation automatique comme Android ; l’ajout passe par le menu Partager.'
+          : 'Note: Safari does not provide an automatic install prompt like Android; installation goes through the Share menu.');
+
+    box.innerHTML =
+      '<h2>' + title + '</h2><br>' +
+      '<div class="installText">' + stepsHtml + shareBtnHtml + '</div><br><br>' +
+      '<div class="installText">' + noteHtml + '</div>';
+  }
+
   // Clic sur l'onglet "Install" : sur Android/Chrome, on declenche tout de
-  // suite l'installation (sans ecran intermediaire). Sinon : instructions.
+  // suite l'installation (sans ecran intermediaire). Sur Safari (iOS/Mac) :
+  // guide visuel Safari + acces direct au menu Partager si disponible.
   function openInstallScreen() {
     var plat = mobilePlatform();
     closeSideNav();
-    if (plat === 'ios') {
+    if (plat === 'ios' || isMacSafari()) {
+      populateSafariInstructions();
       showScreen('installIos');
     } else if (deferredPrompt) {
       launchNativeInstall();
@@ -194,6 +267,17 @@
       e.preventDefault();
       e.stopPropagation();
       installButtonClicked();
+      return;
+    }
+    if (closestWithId(t, 'installSafariShareBtn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (navigator && typeof navigator.share === 'function') {
+        navigator.share({
+          title: document.title || 'RealSheet +',
+          url: window.location.href
+        }).catch(function () { /* annule par l'utilisateur */ });
+      }
       return;
     }
     if (closestWithId(t, 'installCloseLink')) {
