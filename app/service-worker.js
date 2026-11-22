@@ -1,5 +1,5 @@
 // Change version to force cache replacement on all clients
-const CACHE_NAME = 'app-cache-v124-v2.7.31';
+const CACHE_NAME = 'app-cache-v124-v2.7.32';
 const NETWORK_TIMEOUT_MS = 3000;   // max wait for network on static files
 const OFFLINE_WINDOW_MS = 15000;   // after a failure, serve from cache first for this long
 
